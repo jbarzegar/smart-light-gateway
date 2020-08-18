@@ -1,9 +1,10 @@
-const { Discover, Yeelight, Color } = require("yeelight-awesome");
-const _Color = require("color");
-const express = require("express");
-const bodyParser = require("body-parser");
-const { get } = require("lodash");
+import { Discover, Yeelight, Color } from "yeelight-awesome";
+import _Color from "color";
+import express from "express";
+import bodyParser from "body-parser";
 const { rooms } = require("../lights.json");
+
+const lightConf = { transition: "smooth", timeout: 400 };
 
 const useActions = ({ connection }) => ({
   setBright({ intensity, transition, timeout }) {
@@ -19,6 +20,36 @@ const useActions = ({ connection }) => ({
 
 const toRGB = (hex) => new _Color(hex).rgb().toJSON();
 
+const handlePowerAction = (action, body) => {
+  const hasColor = body?.color;
+
+  return async (light) => {
+    const { setPowerState, setColor } = useActions(light);
+    await setPowerState({ state: action, ...lightConf });
+
+    if (hasColor) {
+      await setColor({
+        color: toRGB(`#${body.color}`).color,
+        ...lightConf,
+      });
+    }
+
+    return Promise.resolve();
+  };
+};
+
+const handleDim = (intensity) => async (light) => {
+  try {
+    const { setBright } = useActions(light);
+    await setBright({
+      intensity: parseInt(intensity),
+      ...lightConf,
+    });
+  } catch (e) {
+    throw e;
+  }
+};
+
 function initExpress(lights) {
   const app = express();
 
@@ -27,7 +58,7 @@ function initExpress(lights) {
 
   const getLightsInRoom = (room) => {
     // Get all ids of lights in a room
-    const lightIds = get(rooms, room, []);
+    const lightIds = rooms?.[room] || [];
     return lights.filter((x) => lightIds.some((id) => x.id === id));
   };
 
@@ -36,50 +67,37 @@ function initExpress(lights) {
     const { intensity } = req.body;
     const lightsInRoom = getLightsInRoom(room);
 
-    if (lightsInRoom.length <= 0) return req.sendStatus(204).end();
-
-    const lightConf = { transition: "smooth", timeout: 400 };
+    if (lightsInRoom.length <= 0) return res.sendStatus(204).end();
 
     switch (action) {
       case "on":
       case "off":
         try {
-          lightsInRoom.forEach(async (light) => {
-            const { setPowerState, setColor } = useActions(light);
-            if (get(req.body, "color")) {
-              await setColor({
-                color: toRGB(`#${req.body.color}`).color,
-                ...lightConf,
-              });
-            }
-            setPowerState({ state: action, ...lightConf }).catch(console.error);
-          });
+          await Promise.all(
+            lightsInRoom.map(handlePowerAction(action, req.body))
+          );
         } catch (e) {
           console.error(e);
         }
         break;
       case "dim":
         try {
-          lightsInRoom.forEach((light) => {
-            const { setBright } = useActions(light);
-            setBright({
-              intensity: parseInt(intensity),
-              ...lightConf,
-            }).catch(console.error);
-          });
+          await Promise.all(lightsInRoom.map(handleDim(intensity)));
         } catch (e) {
           console.error(e);
         }
         break;
       case "color":
         try {
-          lightsInRoom.forEach((light) => {
-            const { setColor } = useActions(light);
-            setColor({
-              color: toRGB(`#${req.body.color}`).color,
-              ...lightConf,
-            }).catch(console.error);
-          });
+          await Promise.all(
+            lightsInRoom.map((light) => {
+              const { setColor } = useActions(light);
+              return setColor({
+                color: toRGB(`#${req.body.color}`).color,
+                ...lightConf,
+              });
+            })
+          );
         } catch (e) {
           console.error(e);
         }
@@ -98,16 +116,16 @@ function initExpress(lights) {
 }
 
 function connectToLight({ id, port, host }) {
-  const light = {
-    connection: new Yeelight({ lightId: id, lightPort: port, lightIp: host }),
-    id,
-    port,
-    host,
-  };
+  const connection = new Yeelight({
+    lightId: id,
+    lightPort: port,
+    lightIp: host,
+  });
+
+  const light = { id, port, host, connection };
 
   return new Promise((resolve) => {
     const onConnected = () => resolve(light);
-
     light.connection.on("connected", onConnected);
     light.connection.connect();
   });
