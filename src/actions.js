@@ -8,7 +8,7 @@ export const useActions = (adapter) => (light) => {
       return _.setPowerState(...args);
     },
     setColor({ color = [], ...rest }) {
-      return _.setRGB({ color, ...rest });
+      return _.setColor({ color, ...rest });
     },
   };
 };

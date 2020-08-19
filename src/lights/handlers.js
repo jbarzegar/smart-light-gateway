@@ -35,11 +35,13 @@ export const setupHandlers = (getActions) => ({
     };
   },
 
-  handleColor(light) {
-    const { setColor } = getActions(light);
-    return setColor({
-      color: toRGB(`#${req.body.color}`).color,
-      ...lightConf,
-    });
+  handleColor(body) {
+    return (light) => {
+      const { setColor } = getActions(light);
+      return setColor({
+        color: toRGB(`#${body.color}`).color,
+        ...lightConf,
+      });
+    };
   },
 });
