@@ -19,11 +19,12 @@ export class YeelightDiscoveryClient implements DiscoverClient<Light> {
   }
   async discoverAllLights() {
     const devices = (await this.discoverer.start()).filter(Boolean);
-    const keys = ["id", "host", "port", "name"];
 
     const lights: Light[] = devices.map((_) => ({
-      ...pick(_, keys),
-      connectionStatus: "disconnected",
+      host: _.host,
+      id: _.id,
+      port: _.port,
+      name: _?.name,
       connect: async () => {
         const light = new Yeelight({
           lightId: _.id,
@@ -34,16 +35,23 @@ export class YeelightDiscoveryClient implements DiscoverClient<Light> {
         const l = await light.connect();
 
         return {
-          ...pick(_, keys),
-          name: _.name,
-          setBrightness: (intensity, options) =>
-            l.setBright(intensity, options.transition, options.timing),
-          setColor: (color, options) =>
-            l.setRGB(toRGB(color), options.transition, options.timing),
-          setPower: (status, opts) =>
-            l.setPower(status === "on", opts.transition, opts.timing),
-          connectionStatus: l.connected ? "connected" : "disconnected",
-          disconnect: () => l.disconnect(),
+          id: _.id,
+          host: _.host,
+          port: _.port,
+          name: _?.name,
+          getStatus: () => _.status,
+          setBrightness: async (intensity, options) => {
+            await l.setBright(intensity, options.transition, options.timing);
+          },
+          setColor: async (color, options) => {
+            await l.setRGB(toRGB(color), options.transition, options.timing);
+          },
+          setPower: async (status, opts) => {
+            await l.setPower(status === "on", opts.transition, opts.timing);
+          },
+          disconnect: async () => {
+            await l.disconnect();
+          },
         };
       },
     }));

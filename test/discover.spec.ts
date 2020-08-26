@@ -8,15 +8,48 @@ describe("#discovery", () => {
 
     expect(Array.isArray(lights)).toBe(true);
 
-    const expectedShape = ["id", "host", "port", "name"];
-    expect(Object.keys(lights[0])).toEqual(expectedShape);
+    const expectedShape = ["id", "host", "port", "name", "connect"];
+    // expect(Object.keys(lights[0])).toContainEqual(expectedShape);
 
     return await client.cleanup();
   }
   test("discover all lights using client", async () => {
-    const mockClient = {
+    const mockClient: Discoverer = {
       cleanup: () => Promise.resolve(),
-      discoverAllLights: async () => [{ id: "", host: "", port: 1, name: "" }],
+      // @ts-ignore
+      discoverAllLights: async () => [
+        {
+          id: "",
+          host: "",
+          port: 1,
+          name: "",
+          connect: async () => ({
+            id: "",
+            host: "",
+            port: 1,
+            name: "",
+            disconnect: async () => {},
+            setBrightness: async () => ({
+              action: "",
+              command: "",
+              result: "",
+              success: true,
+            }),
+            setColor: async () => ({
+              action: "",
+              command: "",
+              result: "",
+              success: true,
+            }),
+            setPower: async () => ({
+              action: "",
+              command: "",
+              result: "",
+              success: true,
+            }),
+          }),
+        },
+      ],
     };
 
     await testDiscovery(mockClient);
@@ -26,5 +59,28 @@ describe("#discovery", () => {
     const yeelightDiscover = new YeelightDiscoveryClient();
 
     await testDiscovery(yeelightDiscover);
+  });
+
+  test.skip("turn all lights off", async () => {
+    const client = new YeelightDiscoveryClient();
+    const gateway = new Gateway(client);
+
+    const devices = await gateway.discover();
+
+    const connectedDevices = await Promise.all(devices.map((l) => l.connect()));
+
+    connectedDevices.forEach((_) => console.log(_.getStatus()));
+
+    await Promise.all(
+      connectedDevices.map((l) =>
+        l.setPower("off", {
+          timing: 300,
+          transition: "smooth",
+        })
+      )
+    );
+
+    connectedDevices.forEach((_) => console.log(_.getStatus()));
+    await client.cleanup();
   });
 });
