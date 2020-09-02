@@ -2,6 +2,25 @@ import { Gateway, Discoverer } from "../lib/gateway";
 import { YeelightDiscoveryClient } from "../lib/discoverClient/yeelight";
 
 describe("#discovery", () => {
+	async function testPower(status: "on" | "off") {
+    const client = new YeelightDiscoveryClient();
+    const gateway = new Gateway(client);
+
+    const devices = await gateway.discover();
+
+    const connectedDevices = await Promise.all(devices.map((l) => l.connect()));
+
+    await Promise.all(
+      connectedDevices.map((l) =>
+        l.setPower(status, {
+          timing: 300,
+          transition: "smooth",
+        })
+      )
+    );
+
+    await client.cleanup();
+	}
   async function testDiscovery(client: Discoverer) {
     const gateway = new Gateway(client);
     const lights = await gateway.discover();
@@ -61,26 +80,11 @@ describe("#discovery", () => {
     await testDiscovery(yeelightDiscover);
   });
 
-  test.skip("turn all lights off", async () => {
-    const client = new YeelightDiscoveryClient();
-    const gateway = new Gateway(client);
-
-    const devices = await gateway.discover();
-
-    const connectedDevices = await Promise.all(devices.map((l) => l.connect()));
-
-    connectedDevices.forEach((_) => console.log(_.getStatus()));
-
-    await Promise.all(
-      connectedDevices.map((l) =>
-        l.setPower("off", {
-          timing: 300,
-          transition: "smooth",
-        })
-      )
-    );
-
-    connectedDevices.forEach((_) => console.log(_.getStatus()));
-    await client.cleanup();
+  test("turn all lights off", async () => {
+		await testPower('off')
   });
+
+	test("turn all lights on", async () => {
+		await testPower('on')
+	})
 });
