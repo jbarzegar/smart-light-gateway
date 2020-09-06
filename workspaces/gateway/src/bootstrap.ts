@@ -9,4 +9,6 @@ import * as moduleAlias from 'module-alias'
   .filter(([, p]) => fs.existsSync(p))
   .forEach(([name, p]) => moduleAlias.addAlias(`@${name}`, p))
 
+moduleAlias.addPath(__dirname)
+
 require('./app')

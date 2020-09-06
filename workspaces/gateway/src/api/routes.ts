@@ -1,33 +1,12 @@
-import { Router } from 'express'
-import { LightActions, AppActions } from 'types'
+import { AppActions } from 'types'
+import { useRouter } from 'api/utils'
+import { useLightView } from 'api/views'
 
-const lightRoutes = (actions: LightActions) => {
-  const route = Router()
-
-  route.get('/', async (_, res) => {
-    const response = await actions.getAllLights()
-    return res.send(response)
-  })
-
-  return route
-}
-
-const adminRoutes = () => {
-  const route = Router()
-
-  route.get('/', (_, res) => res.send('ye'))
-
-  return route
-}
-
-const routes = (props: { actions: AppActions }) => {
+type RouteDeps = { actions: AppActions }
+const routes = useRouter<RouteDeps>(([props, route]) => {
   const { actions } = props
-  const router = Router()
 
-  router.use('/lights', lightRoutes(actions.light))
-  router.use('/admin', adminRoutes())
-
-  return router
-}
+  route.use('/lights', useLightView(actions.getLightActions()))
+})
 
 export default routes

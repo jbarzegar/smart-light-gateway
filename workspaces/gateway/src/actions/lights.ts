@@ -1,8 +1,7 @@
 import { LightActions } from 'types'
 import { Gateway } from '@lib/gateway'
 
-type lightActions = (gateway: Gateway) => LightActions
-const initLightActions: lightActions = gateway => ({
+const initLightActions: (gateway: Gateway) => LightActions = gateway => ({
   async getAllLights() {
     const lights = await gateway.discover()
     return lights
