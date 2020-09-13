@@ -4,6 +4,7 @@ import * as chalk from 'chalk'
 import { flow } from 'lodash'
 import * as morgan from 'morgan'
 import { Application, NextHandleFunction, Router, AppActions } from 'types'
+import logger from 'utils/logger'
 import useRouter from 'api/routes'
 
 type RouterParams = { actions: AppActions }
@@ -34,9 +35,9 @@ export default (deps: Deps) => {
 
   const onListening = () => {
     if (process.env.NODE_ENV === 'development')
-      console.log('🚧 gateway running in dev')
+      logger.info('🚧 gateway running in dev')
 
-    console.log(
+    logger.success(
       `👀 gateway api running on watching on: ${chalk.yellow(apiConf.API_PORT)}`
     )
   }
