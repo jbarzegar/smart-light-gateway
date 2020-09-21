@@ -1,5 +1,3 @@
-let defaultConf = require("../../config/.prettierrc.json");
+let defaultConf = require('../../config/.prettierrc.json')
 
-
-module.exports = (defaultConf || {})
-
+module.exports = defaultConf || {}
