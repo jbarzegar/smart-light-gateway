@@ -1,10 +1,12 @@
 import { Router, Request, Response, NextFunction, Application } from 'express'
-import Light from '@lib/entities/lights'
+import Light, { PowerMode } from '@lib/entities/lights'
 
 export type ViewFn = (router: Router) => void
 
 export type LightActions = {
   getAllLights(): Promise<Light[]>
+  getLightById(id: string): Promise<Light | undefined>
+  setLightPower(id: string, power: PowerMode): Promise<PowerMode | undefined>
 }
 
 export type AppActions = {

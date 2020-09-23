@@ -7,11 +7,13 @@ interface _Light {
   name?: string
 }
 
-type MethodOptions = { timing: number; transition: 'smooth' | 'sudden' }
+export type PowerMode = 'off' | 'on'
+export type Transition = 'smooth' | 'sudden'
+export type MethodOptions = { timing: number; transition: Transition }
 
 export interface ConnectedLight extends Omit<_Light, 'connect'> {
   getStatus(): string
-  setPower(status: 'on' | 'off', options: MethodOptions): Promise<void>
+  setPower(status: PowerMode, options: MethodOptions): Promise<void>
   setBrightness(intensity: number, options: MethodOptions): Promise<void>
   setColor(color: string, options: MethodOptions): Promise<void>
   disconnect(): Promise<void>
