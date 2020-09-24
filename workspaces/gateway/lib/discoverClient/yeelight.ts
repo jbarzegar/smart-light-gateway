@@ -23,6 +23,7 @@ export class YeelightDiscoveryClient implements DiscoverClient<Light> {
       id: _.id,
       port: _.port,
       name: _.name || 'unknownYeelight',
+      status: _.status as any,
       connect: async () => {
         const light = new Yeelight({
           lightId: _.id,
@@ -37,6 +38,7 @@ export class YeelightDiscoveryClient implements DiscoverClient<Light> {
           host: _.host,
           port: _.port,
           name: _?.name,
+          status: _.status,
           getStatus: () => _.status,
           setBrightness: async (intensity, options) => {
             await l.setBright(intensity, options.transition, options.timing)

@@ -5,6 +5,7 @@ interface _Light {
   port: number
   host: string
   name?: string
+  status: PowerMode
 }
 
 export type PowerMode = 'off' | 'on'

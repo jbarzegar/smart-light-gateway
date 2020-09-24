@@ -1,36 +1,60 @@
+import { flow } from 'lodash'
 import { LightActions } from 'types'
 import { Gateway } from '@lib/gateway'
-import { MethodOptions } from '@lib/entities/lights'
+import Light, {
+  ConnectedLight,
+  MethodOptions,
+  PowerMode,
+} from '@lib/entities/lights'
+import { ID } from '@lib/util'
 
-type InitActionFn<Actions> = (gateway: Gateway) => Actions
+type InitActionFn<Actions> = (
+  gateway: Gateway,
+  config?: MethodOptions
+) => Actions
 
 const defaultLightConf: MethodOptions = { timing: 500, transition: 'smooth' }
 
-const initLightActions: InitActionFn<LightActions> = gateway => ({
-  async getAllLights() {
-    const lights = await gateway.discover()
+const byId = (id: ID) => (x: Light) => id === x.id
 
-    return lights
-  },
+const initLightActions: InitActionFn<LightActions> = (
+  gateway,
+  conf = defaultLightConf
+) => {
+  const getLightById = flow<
+    [ID],
+    { id: ID; lights: Promise<Light[]> },
+    Promise<Light | undefined>
+  >(
+    id => ({ lights: gateway.discover(), id }),
+    async ({ id, lights }) => (await lights).find(byId(id))
+  )
 
-  async getLightById(id) {
-    const lights = await gateway.discover()
-    const light = lights.find(x => x.id === id)
+  const setPower = flow<
+    [Light, PowerMode],
+    { mode: PowerMode; light: Promise<ConnectedLight> },
+    Promise<void>
+  >(
+    (light, mode) => ({ mode, light: light.connect() }),
+    async ({ mode, light }) => {
+      const l = await light
+      await l.setPower(mode, conf)
+      l.disconnect()
+    }
+  )
 
-    return light
-  },
-  async setLightPower(id, powerMode) {
-    const lights = await gateway.discover()
-    const light = lights.find(x => x.id === id)
+  return {
+    getAllLights: () => gateway.discover(),
+    getLightById,
+    async setLightPower(id, powerMode) {
+      const light = await getLightById(id)
 
-    if (!light) return undefined
+      if (!light) return undefined
 
-    const connectedLight = await light.connect()
-    await connectedLight.setPower(powerMode, defaultLightConf)
-    await connectedLight.disconnect()
-
-    return powerMode
-  },
-})
+      await setPower(light, powerMode)
+      return powerMode
+    },
+  }
+}
 
 export default initLightActions

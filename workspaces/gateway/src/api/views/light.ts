@@ -1,4 +1,3 @@
-import { upperCase } from 'lodash'
 import { LightActions } from 'types'
 import { useRouter } from '../utils'
 

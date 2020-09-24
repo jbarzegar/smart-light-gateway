@@ -8,34 +8,140 @@ import {
   SimpleGrid,
   Skeleton,
   Heading,
+  Button,
 } from '@chakra-ui/core'
-import { useQuery } from 'react-query'
+import { useMutation, useQuery, queryCache } from 'react-query'
 import { startCase } from 'lodash'
 import { RiLightbulbLine } from 'react-icons/ri'
-import { Light } from './types'
+import { Light, PowerStatus } from './types'
 
-enum ApiRoutes {
-  lights = '/api/lights',
+const defaultRequestObj: RequestInit = {
+  headers: { 'Content-Type': 'application/json' },
+}
+const promise = (
+  fn: (
+    resolve: (value?: unknown) => void,
+    reject: (value?: unknown) => void
+  ) => void
+) => new Promise((resolve, reject) => fn(resolve, reject))
+
+const sendRequest = (
+  url: string,
+  responseHandler: (response: Response) => Promise<any>,
+  options: RequestInit = defaultRequestObj
+) =>
+  promise((resolve, reject) =>
+    fetch(url, { ...defaultRequestObj, ...options })
+      .then(resp => (resp.ok ? responseHandler(resp) : reject(resp)))
+      .then(_ => resolve(_))
+      .catch(err => reject(err))
+  )
+
+const getDiscoveredLights = (): Promise<Light[]> =>
+  sendRequest('/api/lights', _ => _.json()) as Promise<Light[]>
+
+const setLightPower = (id: string, powerStatus: PowerStatus) =>
+  sendRequest(`/api/lights/${id}/power`, _ => _.json(), {
+    method: 'POST',
+    body: JSON.stringify({ powerStatus }),
+  })
+
+const useHoverEvent = () => {
+  const [hovered, setHovered] = React.useState(false)
+
+  const hoverProps = React.useMemo(
+    () => ({
+      hovered,
+      getEventProps: () => ({
+        onMouseEnter: () => setHovered(true),
+        onMouseLeave: () => setHovered(false),
+      }),
+    }),
+    [hovered]
+  )
+
+  return hoverProps
 }
 
-const getDiscoveredLights = async (): Promise<Light[]> => {
-  try {
-    const resp = await fetch(ApiRoutes.lights)
-    if (!resp.ok) throw { err: 'fetchNotOk', obj: resp }
-    const data: Light[] = await resp.json()
+const LightCard = ({
+  light,
+  onPowerBtnClick,
+}: {
+  light: Light
+  onPowerBtnClick: (id: string, powerStatus: PowerStatus) => void
+}) => {
+  const { hovered, getEventProps } = useHoverEvent()
 
-    return data
-  } catch (e) {
-    throw e
-  }
+  const handlePowerClick = React.useCallback(
+    (powerMode: PowerStatus) => () => onPowerBtnClick(light.id, powerMode),
+    [light.id, onPowerBtnClick]
+  )
+
+  const buttonStyles = (x: boolean) => ({
+    bg: x ? 'gray.900' : 'transparent',
+    color: x ? 'white' : 'gray.900',
+    border: '2px solid',
+    borderColor: 'gray.900',
+  })
+
+  return (
+    <Box
+      {...getEventProps()}
+      padding={4}
+      borderColor="gray.900"
+      borderWidth={2}
+      borderStyle="solid"
+      borderRadius="10px"
+      boxShadow={
+        '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+      }
+    >
+      <Box as={RiLightbulbLine} fontSize="6xl"></Box>
+      <Text fontSize="2xl" color="gray.900" fontWeight="bold">
+        {startCase(light.name)}
+      </Text>
+
+      {hovered ? (
+        <Flex alignItems="center">
+          <Button
+            mr="4"
+            {...buttonStyles(light.status === 'off')}
+            onClick={handlePowerClick('off')}
+          >
+            Off
+          </Button>
+          <Button
+            {...buttonStyles(light.status === 'on')}
+            onClick={handlePowerClick('on')}
+          >
+            On
+          </Button>
+        </Flex>
+      ) : (
+        <Flex align="center" color="gray.500">
+          <Text mr={4}>{light.host}</Text>
+          <Text>{light.port}</Text>
+        </Flex>
+      )}
+    </Box>
+  )
 }
+
 const Discovered = () => {
   const { data, status, error } = useQuery<Light[]>(
     'discoveredLights',
     getDiscoveredLights
-    // (): Promise<Light[]> =>
-    //   new Promise(resolve => setTimeout(() => resolve([]), 2000))
   )
+  const [mutatePower] = useMutation(
+    (variables: { id: string; powerStatus: PowerStatus }) =>
+      setLightPower(variables.id, variables.powerStatus),
+    {
+      onSuccess: () => {
+        queryCache.refetchQueries('discoveredLights')
+      },
+    }
+  )
+
   if (status === 'error')
     return (
       <Text color="red.500" fontSize="6xl">
@@ -60,26 +166,13 @@ const Discovered = () => {
             </Heading>
             <SimpleGrid columns={6} spacing={10} minChildWidth="250px">
               {data?.map(light => (
-                <Box
+                <LightCard
+                  light={light}
                   key={light.id}
-                  padding={4}
-                  borderColor="gray.900"
-                  borderWidth={2}
-                  borderStyle="solid"
-                  borderRadius="10px"
-                  boxShadow={
-                    '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                  onPowerBtnClick={(id, powerStatus) =>
+                    mutatePower({ id, powerStatus })
                   }
-                >
-                  <Box as={RiLightbulbLine} fontSize="6xl"></Box>
-                  <Text fontSize="2xl" color="gray.900" fontWeight="bold">
-                    {startCase(light.name)}
-                  </Text>
-                  <Flex align="center" color="gray.500">
-                    <Text mr={4}>{light.host}</Text>
-                    <Text>{light.port}</Text>
-                  </Flex>
-                </Box>
+                />
               ))}
             </SimpleGrid>
           </>
@@ -99,5 +192,4 @@ const App = () => (
   </ThemeProvider>
 )
 
-// App = () => <p>'yote'</p>
 export default App
