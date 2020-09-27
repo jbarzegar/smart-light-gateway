@@ -44,7 +44,10 @@ export const useLightView = useRouter<LightActions>(([actions, route]) => {
         .setLightPower(lightId, powerStatus)
         .then(_ => _ || notFound('could not find light'))
         .then(status => res.status(200).send({ status }))
-        .catch(err => res.status(400).json(err))
+        .catch(err => {
+          console.log(err)
+          res.status(400).json(err)
+        })
     }
   )
 })

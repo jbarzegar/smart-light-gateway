@@ -24,3 +24,5 @@ export default interface Light extends _Light {
   /** return value indicates successful connection */
   connect(): Promise<ConnectedLight>
 }
+
+export type BaseLight = Omit<Light, 'connect'>

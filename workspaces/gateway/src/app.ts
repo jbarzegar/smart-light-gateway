@@ -2,13 +2,12 @@ import { flow } from 'lodash'
 import api from './api'
 import initLightActions from './actions/lights'
 import { Gateway } from '@lib/gateway'
-// import { MockClient } from '@lib/discoverClient/__mock'
-import { YeelightDiscoveryClient } from '@lib/discoverClient/yeelight'
+import { MockClient } from '@lib/discoverClient/__mock'
 
 type ApiConf = Parameters<typeof api>[0]
 
 const getLightActions = flow(
-  () => new YeelightDiscoveryClient(),
+  () => new MockClient(),
   client => new Gateway(client),
   gateway => initLightActions(gateway)
 )

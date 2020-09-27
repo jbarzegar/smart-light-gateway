@@ -18,33 +18,31 @@ import { Light, PowerStatus } from './types'
 const defaultRequestObj: RequestInit = {
   headers: { 'Content-Type': 'application/json' },
 }
-const promise = (
-  fn: (
-    resolve: (value?: unknown) => void,
-    reject: (value?: unknown) => void
-  ) => void
-) => new Promise((resolve, reject) => fn(resolve, reject))
-
-const sendRequest = (
+function sendRequest<T = unknown>(
   url: string,
   responseHandler: (response: Response) => Promise<any>,
   options: RequestInit = defaultRequestObj
-) =>
-  promise((resolve, reject) =>
+): Promise<T> {
+  return new Promise((resolve, reject) =>
     fetch(url, { ...defaultRequestObj, ...options })
       .then(resp => (resp.ok ? responseHandler(resp) : reject(resp)))
       .then(_ => resolve(_))
       .catch(err => reject(err))
   )
+}
 
 const getDiscoveredLights = (): Promise<Light[]> =>
   sendRequest('/api/lights', _ => _.json()) as Promise<Light[]>
 
 const setLightPower = (id: string, powerStatus: PowerStatus) =>
-  sendRequest(`/api/lights/${id}/power`, _ => _.json(), {
-    method: 'POST',
-    body: JSON.stringify({ powerStatus }),
-  })
+  sendRequest<{ status: PowerStatus }>(
+    `/api/lights/${id}/power`,
+    _ => _.json(),
+    {
+      method: 'POST',
+      body: JSON.stringify({ powerStatus }),
+    }
+  )
 
 const useHoverEvent = () => {
   const [hovered, setHovered] = React.useState(false)
@@ -127,17 +125,31 @@ const LightCard = ({
   )
 }
 
+enum Queries {
+  discoveredLights,
+}
+
 const Discovered = () => {
   const { data, status, error } = useQuery<Light[]>(
-    'discoveredLights',
+    Queries.discoveredLights,
     getDiscoveredLights
   )
   const [mutatePower] = useMutation(
     (variables: { id: string; powerStatus: PowerStatus }) =>
       setLightPower(variables.id, variables.powerStatus),
     {
-      onSuccess: () => {
-        queryCache.refetchQueries('discoveredLights')
+      onSuccess: ({ status }, variables) => {
+        // @ts-ignore
+        queryCache.setQueryData(Queries.discoveredLights, (data: Light[]) => {
+          const lights = [...data]
+          const index = lights.findIndex(x => x.id === variables.id)
+
+          if (!lights[index]) return undefined
+
+          lights[index] = { ...lights[index], status }
+
+          return lights
+        })
       },
     }
   )
