@@ -37,3 +37,25 @@ export function createStore<T extends Object>(initialState: T): Store<T> {
 
   return { getState, setState }
 }
+
+type FindFn<T> = (x: T, index?: number) => boolean
+type Insert<T> = { into: T[]; usingIndex: number | FindFn<T>; item: T }
+export const insert = <T>({
+  into: arr,
+  usingIndex: index,
+  item,
+}: Insert<T>): T[] => {
+  const newArr = [...arr]
+  const getIndex = (): number => {
+    switch (typeof index) {
+      case 'number':
+        return index
+      case 'function':
+        return newArr.findIndex((x, i) => index(x, i))
+    }
+  }
+
+  newArr[getIndex()] = item
+
+  return newArr
+}

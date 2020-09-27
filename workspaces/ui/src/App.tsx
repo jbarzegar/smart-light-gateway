@@ -31,17 +31,14 @@ function sendRequest<T = unknown>(
   )
 }
 
-const getDiscoveredLights = (): Promise<Light[]> =>
-  sendRequest('/api/lights', _ => _.json()) as Promise<Light[]>
+const getDiscoveredLights = () =>
+  sendRequest<Light[]>('/api/lights', _ => _.json())
 
 const setLightPower = (id: string, powerStatus: PowerStatus) =>
   sendRequest<{ status: PowerStatus }>(
     `/api/lights/${id}/power`,
     _ => _.json(),
-    {
-      method: 'POST',
-      body: JSON.stringify({ powerStatus }),
-    }
+    { method: 'POST', body: JSON.stringify({ powerStatus }) }
   )
 
 const useHoverEvent = () => {
