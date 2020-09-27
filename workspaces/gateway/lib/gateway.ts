@@ -15,7 +15,7 @@ export class Gateway implements IGateway {
   /** A non persistent connection that returns all lights on network */
   async discover(): Promise<Light[]> {
     const lights = await this.discoverer.discoverAllLights()
-    await this.discoverer.cleanup()
+
     return lights
   }
 }

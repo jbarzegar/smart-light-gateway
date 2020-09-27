@@ -1,44 +1,50 @@
-import { v4 as uuid } from 'uuid'
-import Light from '@lib/entities/lights'
+import Light, { ConnectedLight, BaseLight } from '@lib/entities/lights'
+import { createStore, insert } from '@lib/util'
 import { DiscoverClient } from './'
+import { globalLights } from '../constants'
+
+type MakeConnect = (
+  base: BaseLight,
+  conf?: Partial<BaseLight>
+) => () => Promise<ConnectedLight>
+const makeConnect: MakeConnect = (base, conf = {}) => {
+  const light = { ...base, ...conf }
+
+  return async () => ({
+    ...light,
+    getStatus: () => 'something',
+
+    setPower: async status => {
+      store.setState(state => ({
+        ...state,
+        lights: insert<Light>({
+          item: {
+            ...light,
+            connect: makeConnect(light, { status }),
+          },
+          into: state.lights,
+          usingIndex: x => x.id === light.id,
+        }),
+      }))
+    },
+
+    async setBrightness(int: number, opts: any) {},
+    async setColor(color: string, opts: any) {},
+    async disconnect() {},
+  })
+}
+
+const store = createStore<{ lights: Light[] }>({
+  lights: globalLights.map(light => ({
+    ...light,
+    connect: makeConnect(light),
+  })),
+})
 
 export class MockClient implements DiscoverClient<Light> {
-  lightCount: number = 12
-  lightConf: Omit<Light, 'connect' | 'id'>
-  constructor(opts: { lightCount?: number } = {}) {
-    this.lightCount = opts?.lightCount || 12
-    this.lightConf = {
-      host: '0.0.0.0',
-      port: 420,
-    }
-  }
-  private setId() {
-    return uuid()
-  }
   async cleanup() {
     console.warn('TODO: Not implemented')
   }
-  async discoverAllLights(): Promise<Light[]> {
-    const arr = new Array<Light>(this.lightCount).fill({} as Light)
 
-    return arr.map((_, i) => {
-      const conf = {
-        ...this.lightConf,
-        id: this.setId(),
-        name: `mocked-light-${i}`,
-      }
-      const connect = async () => ({
-        ...conf,
-        getStatus: () => 'something',
-        async setPower(status: any, opts: any) {},
-        async setBrightness(int: number, opts: any) {},
-        async setColor(color: string, opts: any) {},
-        async disconnect() {},
-      })
-      return {
-        ...conf,
-        connect,
-      }
-    })
-  }
+  discoverAllLights = async () => store.getState().lights
 }

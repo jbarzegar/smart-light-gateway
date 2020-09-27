@@ -6,6 +6,7 @@ import * as morgan from 'morgan'
 import { Application, NextHandleFunction, Router, AppActions } from 'types'
 import logger from 'utils/logger'
 import useRouter from 'api/routes'
+const listEndpoints = require('express-list-endpoints')
 
 type RouterParams = { actions: AppActions }
 type Deps = RouterParams
@@ -31,7 +32,30 @@ export default (deps: Deps) => {
     applyMiddleware(jsonParser(), morgan('dev')),
     initRouter(deps)
   )
+
   const app = setupApp()
+
+  if (process.env.NODE_ENV === 'development') {
+    const endpoints: { path: string }[] = listEndpoints(app)
+
+    app.get('/', (_, res) => {
+      res.send(`
+      <style>
+        a {
+          font-family: sans-serif;
+          font-size: 40px;
+
+        }
+        html { padding: 1rem }
+      </style>
+      <html>
+        ${endpoints.map(
+          endpoint => `<a href="${endpoint.path}">${endpoint.path}</a>`
+        )}
+        </html>
+      `)
+    })
+  }
 
   const onListening = () => {
     if (process.env.NODE_ENV === 'development')

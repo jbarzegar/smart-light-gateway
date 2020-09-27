@@ -18,12 +18,12 @@ export class YeelightDiscoveryClient implements DiscoverClient<Light> {
   }
   async discoverAllLights() {
     const devices = (await this.discoverer.start()).filter(Boolean)
-
     const lights: Light[] = devices.map(_ => ({
       host: _.host,
       id: _.id,
       port: _.port,
-      name: _?.name,
+      name: _.name || 'unknownYeelight',
+      status: _.status as any,
       connect: async () => {
         const light = new Yeelight({
           lightId: _.id,
@@ -38,6 +38,7 @@ export class YeelightDiscoveryClient implements DiscoverClient<Light> {
           host: _.host,
           port: _.port,
           name: _?.name,
+          status: _.status,
           getStatus: () => _.status,
           setBrightness: async (intensity, options) => {
             await l.setBright(intensity, options.transition, options.timing)
@@ -57,8 +58,7 @@ export class YeelightDiscoveryClient implements DiscoverClient<Light> {
 
     return lights
   }
-  async cleanup() {
-    await this.discoverer.destroy()
-    return
+  cleanup() {
+    return this.discoverer.destroy()
   }
 }
