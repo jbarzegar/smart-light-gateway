@@ -7,3 +7,8 @@ export interface Light {
   port: string
   status: 'off' | 'on'
 }
+
+/** All present queries existing in react-query's cache */
+export enum Queries {
+  discoveredLights,
+}

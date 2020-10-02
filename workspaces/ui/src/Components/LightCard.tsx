@@ -2,24 +2,19 @@ import * as React from 'react'
 import { Box, Text, Flex } from '@chakra-ui/core'
 import { startCase } from 'lodash'
 import { RiLightbulbLine } from 'react-icons/ri'
-import { useHoverEvent } from 'hooks'
 import { Light, PowerStatus } from 'types'
-
-import { LightButtonRow } from './LightButtonRow'
+import { LightButtonRow } from 'components/LightButtonRow'
 
 type LightCardProps = {
   light: Light
   onPowerBtnClick(id: string, powerStatus: PowerStatus): void
 }
 export const LightCard = ({ light, onPowerBtnClick }: LightCardProps) => {
-  const { hovered, getEventProps } = useHoverEvent()
-
   const handlePowerClick = (powerMode: PowerStatus) => () =>
     onPowerBtnClick(light.id, powerMode)
 
   return (
     <Box
-      {...getEventProps()}
       padding={4}
       borderColor="gray.900"
       borderWidth={2}
@@ -33,19 +28,17 @@ export const LightCard = ({ light, onPowerBtnClick }: LightCardProps) => {
       <Text fontSize="2xl" color="gray.900" fontWeight="bold">
         {startCase(light.name)}
       </Text>
-
-      {hovered ? (
+      <Flex justify="space-between">
         <LightButtonRow
           lightStatus={light.status}
           onPowerOff={handlePowerClick('off')}
           onPowerOn={handlePowerClick('on')}
         />
-      ) : (
-        <Flex align="center" color="gray.500">
+        <Flex align="center" color="gray.500" pr={2} pb={0}>
           <Text mr={4}>{light.host}</Text>
           <Text>{light.port}</Text>
         </Flex>
-      )}
+      </Flex>
     </Box>
   )
 }

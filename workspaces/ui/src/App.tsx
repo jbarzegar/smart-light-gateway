@@ -1,4 +1,5 @@
 import React from 'react'
+import { useMutation, useQuery } from 'react-query'
 import {
   ThemeProvider,
   theme,
@@ -8,41 +9,30 @@ import {
   Skeleton,
   Heading,
 } from '@chakra-ui/core'
-import { useMutation, useQuery, queryCache } from 'react-query'
-import { Light, PowerStatus } from './types'
-import { lights } from './api'
-import { LightCard } from 'Components/LightCard'
-
-enum Queries {
-  discoveredLights,
-}
-
-const setLightStatus = (status: PowerStatus, lightId: string) => {
-  queryCache.setQueryData<Light[]>(
-    Queries.discoveredLights,
-    (data): Light[] => {
-      if (!data) return []
-
-      const lights = [...data]
-      const index = lights.findIndex(x => x.id === lightId)
-
-      if (!lights[index]) return []
-
-      lights[index] = { ...lights[index], status }
-
-      return lights
-    }
-  )
-}
+import { lights } from 'api'
+import { Light, PowerStatus, Queries } from 'types'
+import { setLightStatus } from 'effects'
+import { LightCard } from 'components/LightCard'
 
 const Discovered = () => {
   const { data, status, error } = useQuery<Light[]>(
     Queries.discoveredLights,
     lights.getAll
   )
-  const [mutatePower] = useMutation(lights.setPower, {
-    onSuccess: ({ status }, { id }) => setLightStatus(status, id),
+  const [mutatePower, mutation] = useMutation(lights.setPower, {
+    onSuccess: ({ status }, { id }) => {
+      setLightStatus(status, id)
+      mutation.reset()
+    },
   })
+
+  React.useEffect(() => {
+    console.log(mutation.status)
+  }, [mutation.status])
+
+  const handlePowerButtonClick = (id: string, powerStatus: PowerStatus) => {
+    if (mutation.status === 'idle') mutatePower({ id, powerStatus })
+  }
 
   if (status === 'error')
     return (
@@ -53,7 +43,7 @@ const Discovered = () => {
     )
 
   return (
-    <Box p={20}>
+    <Box p={20} pt={0}>
       {status === 'loading' && (
         <Heading fontSize="4xl">Discovering Lights...</Heading>
       )}
@@ -72,9 +62,7 @@ const Discovered = () => {
                 <LightCard
                   light={light}
                   key={light.id}
-                  onPowerBtnClick={(id, powerStatus) =>
-                    mutatePower({ id, powerStatus })
-                  }
+                  onPowerBtnClick={handlePowerButtonClick}
                 />
               ))}
             </SimpleGrid>
