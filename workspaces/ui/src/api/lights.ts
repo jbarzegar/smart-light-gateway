@@ -5,8 +5,11 @@ import { sendRequest } from './'
 export const getAll = () =>
   sendRequest<Light[]>({ to: '/api/lights', handle: as => as.json() })
 
-export const setPower = (id: string, powerStatus: PowerStatus) =>
-  sendRequest<{ status: PowerStatus }>(
+type SetPowerResponse = { status: PowerStatus }
+type SetPowerVariables = { id: string; powerStatus: PowerStatus }
+
+export const setPower = ({ id, powerStatus }: SetPowerVariables) =>
+  sendRequest<SetPowerResponse>(
     { to: `/api/lights/${id}/power`, handle: as => as.json() },
     { method: 'POST', body: JSON.stringify({ powerStatus }) }
   )

@@ -47,7 +47,11 @@ export class YeelightDiscoveryClient implements DiscoverClient<Light> {
             await l.setRGB(toRGB(color), options.transition, options.timing)
           },
           setPower: async (status, opts) => {
-            await l.setPower(status === 'on', opts.transition, opts.timing)
+            try {
+              await l.setPower(status === 'on', opts.transition, opts.timing)
+            } catch (e) {
+              throw e
+            }
           },
           disconnect: async () => {
             await l.disconnect()

@@ -40,14 +40,9 @@ const Discovered = () => {
     Queries.discoveredLights,
     lights.getAll
   )
-  const [mutatePower] = useMutation(
-    (variables: { id: string; powerStatus: PowerStatus }) =>
-      lights.setPower(variables.id, variables.powerStatus),
-    {
-      onSuccess: ({ status }, variables) =>
-        setLightStatus(status, variables.id),
-    }
-  )
+  const [mutatePower] = useMutation(lights.setPower, {
+    onSuccess: ({ status }, { id }) => setLightStatus(status, id),
+  })
 
   if (status === 'error')
     return (
