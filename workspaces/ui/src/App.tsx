@@ -1,18 +1,19 @@
 import React from 'react'
 import { useMutation, useQuery } from 'react-query'
-import {
-  ThemeProvider,
-  theme,
-  Text,
-  Box,
-  SimpleGrid,
-  Skeleton,
-  Heading,
-} from '@chakra-ui/core'
+import { Text, Box, SimpleGrid, Heading } from '@chakra-ui/core'
 import { lights } from 'api'
 import { Light, PowerStatus, Queries } from 'types'
 import { setLightStatus } from 'effects'
 import { LightCard } from 'components/LightCard'
+
+const defaultData = new Array(10).fill(0).map<Light>((n, i) => ({
+  id: `${i + 1}`,
+  name: '',
+  host: '1234',
+  status: 'on',
+  type: 'light',
+  port: '12',
+}))
 
 const Discovered = () => {
   const { data, status, error } = useQuery<Light[]>(
@@ -26,9 +27,12 @@ const Discovered = () => {
     },
   })
 
-  React.useEffect(() => {
-    console.log(mutation.status)
-  }, [mutation.status])
+  const hasData = !!data?.length
+
+  const allLights = React.useMemo<Light[]>(
+    () => (hasData ? (data as Light[]) : defaultData),
+    [data, hasData]
+  )
 
   const handlePowerButtonClick = (id: string, powerStatus: PowerStatus) => {
     if (mutation.status === 'idle') mutatePower({ id, powerStatus })
@@ -47,40 +51,33 @@ const Discovered = () => {
       {status === 'loading' && (
         <Heading fontSize="4xl">Discovering Lights...</Heading>
       )}
-      <Skeleton
-        isLoaded={status === 'success'}
-        colorStart="#4A5568"
-        colorEnd="#171923"
-      >
-        {data?.length ? (
-          <>
+
+      {status !== 'loading' && (
+        <>
+          {allLights.length ? (
             <Heading fontSize="4xl" mb={12}>
-              Discovered {data.length} light(s)
+              Discovered {allLights.length} light(s)
             </Heading>
-            <SimpleGrid columns={6} spacing={10} minChildWidth="250px">
-              {data?.map(light => (
-                <LightCard
-                  light={light}
-                  key={light.id}
-                  onPowerBtnClick={handlePowerButtonClick}
-                />
-              ))}
-            </SimpleGrid>
-          </>
-        ) : (
-          <Heading fontSize="4xl">No lights found</Heading>
-        )}
-      </Skeleton>
+          ) : (
+            <Heading fontSize="4xl">No lights found</Heading>
+          )}
+        </>
+      )}
+
+      <SimpleGrid columns={6} spacing={10} minChildWidth="250px">
+        {allLights.map(light => (
+          <LightCard
+            isLoaded={status === 'success'}
+            light={light}
+            key={light.id}
+            onPowerBtnClick={handlePowerButtonClick}
+          />
+        ))}
+      </SimpleGrid>
     </Box>
   )
 }
 
-const App = () => (
-  <ThemeProvider theme={theme}>
-    <>
-      <Discovered />
-    </>
-  </ThemeProvider>
-)
+const App = () => <Discovered />
 
 export default App

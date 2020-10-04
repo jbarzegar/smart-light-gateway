@@ -7,11 +7,6 @@ type SendRequestParams = {
   to: string
   handle(response: Response): Promise<any>
 }
-// type SendRequest<T = unknown> = (
-//   params: ,
-//   options?: RequestInit
-// ) => Promise<T>
-
 export function sendRequest<T = unknown>(
   { to: from, handle }: SendRequestParams,
   options: RequestInit = defaultRequestObj

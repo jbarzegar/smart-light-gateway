@@ -1,6 +1,6 @@
 import { queryCache } from 'react-query'
+import { updateElement } from '@smrt/utils'
 import { Light, PowerStatus, Queries } from 'types'
-import { updateElement } from 'utils'
 
 type Setter<T> = (state: T) => T
 
