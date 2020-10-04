@@ -44,5 +44,5 @@ export class MockClient implements DiscoverClient<Light> {
     (await db)
       .get('lights')
       .value()
-      .map(x => ({ ...x, connect: makeConnect(x) }))
+      .map(light => ({ ...light, connect: makeConnect(light) }))
 }
