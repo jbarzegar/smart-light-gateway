@@ -1,155 +1,42 @@
 import React from 'react'
-import {
-  ThemeProvider,
-  theme,
-  Text,
-  Box,
-  Flex,
-  SimpleGrid,
-  Skeleton,
-  Heading,
-  Button,
-} from '@chakra-ui/core'
-import { useMutation, useQuery, queryCache } from 'react-query'
-import { startCase } from 'lodash'
-import { RiLightbulbLine } from 'react-icons/ri'
-import { Light, PowerStatus } from './types'
+import { useMutation, useQuery } from 'react-query'
+import { Text, Box, SimpleGrid, Heading } from '@chakra-ui/core'
+import { lights } from 'api'
+import { Light, PowerStatus, Queries } from 'types'
+import { setLightStatus } from 'effects'
+import { LightCard } from 'components/LightCard'
 
-const defaultRequestObj: RequestInit = {
-  headers: { 'Content-Type': 'application/json' },
-}
-function sendRequest<T = unknown>(
-  url: string,
-  responseHandler: (response: Response) => Promise<any>,
-  options: RequestInit = defaultRequestObj
-): Promise<T> {
-  return new Promise((resolve, reject) =>
-    fetch(url, { ...defaultRequestObj, ...options })
-      .then(resp => (resp.ok ? responseHandler(resp) : reject(resp)))
-      .then(_ => resolve(_))
-      .catch(err => reject(err))
-  )
-}
-
-const getDiscoveredLights = () =>
-  sendRequest<Light[]>('/api/lights', _ => _.json())
-
-const setLightPower = (id: string, powerStatus: PowerStatus) =>
-  sendRequest<{ status: PowerStatus }>(
-    `/api/lights/${id}/power`,
-    _ => _.json(),
-    { method: 'POST', body: JSON.stringify({ powerStatus }) }
-  )
-
-const useHoverEvent = () => {
-  const [hovered, setHovered] = React.useState(false)
-
-  const hoverProps = React.useMemo(
-    () => ({
-      hovered,
-      getEventProps: () => ({
-        onMouseEnter: () => setHovered(true),
-        onMouseLeave: () => setHovered(false),
-      }),
-    }),
-    [hovered]
-  )
-
-  return hoverProps
-}
-
-const LightCard = ({
-  light,
-  onPowerBtnClick,
-}: {
-  light: Light
-  onPowerBtnClick: (id: string, powerStatus: PowerStatus) => void
-}) => {
-  const { hovered, getEventProps } = useHoverEvent()
-
-  const handlePowerClick = React.useCallback(
-    (powerMode: PowerStatus) => () => onPowerBtnClick(light.id, powerMode),
-    [light.id, onPowerBtnClick]
-  )
-
-  const buttonStyles = (x: boolean) => ({
-    bg: x ? 'gray.900' : 'transparent',
-    color: x ? 'white' : 'gray.900',
-    border: '2px solid',
-    borderColor: 'gray.900',
-  })
-
-  return (
-    <Box
-      {...getEventProps()}
-      padding={4}
-      borderColor="gray.900"
-      borderWidth={2}
-      borderStyle="solid"
-      borderRadius="10px"
-      boxShadow={
-        '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-      }
-    >
-      <Box as={RiLightbulbLine} fontSize="6xl"></Box>
-      <Text fontSize="2xl" color="gray.900" fontWeight="bold">
-        {startCase(light.name)}
-      </Text>
-
-      {hovered ? (
-        <Flex alignItems="center">
-          <Button
-            mr="4"
-            {...buttonStyles(light.status === 'off')}
-            onClick={handlePowerClick('off')}
-          >
-            Off
-          </Button>
-          <Button
-            {...buttonStyles(light.status === 'on')}
-            onClick={handlePowerClick('on')}
-          >
-            On
-          </Button>
-        </Flex>
-      ) : (
-        <Flex align="center" color="gray.500">
-          <Text mr={4}>{light.host}</Text>
-          <Text>{light.port}</Text>
-        </Flex>
-      )}
-    </Box>
-  )
-}
-
-enum Queries {
-  discoveredLights,
-}
+const defaultData = new Array(10).fill(0).map<Light>((n, i) => ({
+  id: `${i + 1}`,
+  name: '',
+  host: '1234',
+  status: 'on',
+  type: 'light',
+  port: '12',
+}))
 
 const Discovered = () => {
   const { data, status, error } = useQuery<Light[]>(
     Queries.discoveredLights,
-    getDiscoveredLights
+    lights.getAll
   )
-  const [mutatePower] = useMutation(
-    (variables: { id: string; powerStatus: PowerStatus }) =>
-      setLightPower(variables.id, variables.powerStatus),
-    {
-      onSuccess: ({ status }, variables) => {
-        // @ts-ignore
-        queryCache.setQueryData(Queries.discoveredLights, (data: Light[]) => {
-          const lights = [...data]
-          const index = lights.findIndex(x => x.id === variables.id)
+  const [mutatePower, mutation] = useMutation(lights.setPower, {
+    onSuccess: ({ status }, { id }) => {
+      setLightStatus(status, id)
+      mutation.reset()
+    },
+  })
 
-          if (!lights[index]) return undefined
+  const hasData = !!data?.length
 
-          lights[index] = { ...lights[index], status }
-
-          return lights
-        })
-      },
-    }
+  const allLights = React.useMemo<Light[]>(
+    () => (hasData ? (data as Light[]) : defaultData),
+    [data, hasData]
   )
+
+  const handlePowerButtonClick = (id: string, powerStatus: PowerStatus) => {
+    if (mutation.status === 'idle') mutatePower({ id, powerStatus })
+  }
 
   if (status === 'error')
     return (
@@ -158,47 +45,39 @@ const Discovered = () => {
         {console.log(error)}
       </Text>
     )
+
   return (
-    <Box p={20}>
+    <Box p={20} pt={0}>
       {status === 'loading' && (
         <Heading fontSize="4xl">Discovering Lights...</Heading>
       )}
-      <Skeleton
-        isLoaded={status === 'success'}
-        colorStart="#4A5568"
-        colorEnd="#171923"
-      >
-        {data?.length ? (
-          <>
+
+      {status !== 'loading' && (
+        <>
+          {allLights.length ? (
             <Heading fontSize="4xl" mb={12}>
-              Discovered {data.length} light(s)
+              Discovered {allLights.length} light(s)
             </Heading>
-            <SimpleGrid columns={6} spacing={10} minChildWidth="250px">
-              {data?.map(light => (
-                <LightCard
-                  light={light}
-                  key={light.id}
-                  onPowerBtnClick={(id, powerStatus) =>
-                    mutatePower({ id, powerStatus })
-                  }
-                />
-              ))}
-            </SimpleGrid>
-          </>
-        ) : (
-          <Heading fontSize="4xl">No lights found</Heading>
-        )}
-      </Skeleton>
+          ) : (
+            <Heading fontSize="4xl">No lights found</Heading>
+          )}
+        </>
+      )}
+
+      <SimpleGrid columns={6} spacing={10} minChildWidth="250px">
+        {allLights.map(light => (
+          <LightCard
+            isLoaded={status === 'success'}
+            light={light}
+            key={light.id}
+            onPowerBtnClick={handlePowerButtonClick}
+          />
+        ))}
+      </SimpleGrid>
     </Box>
   )
 }
 
-const App = () => (
-  <ThemeProvider theme={theme}>
-    <>
-      <Discovered />
-    </>
-  </ThemeProvider>
-)
+const App = () => <Discovered />
 
 export default App

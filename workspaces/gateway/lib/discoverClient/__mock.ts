@@ -1,7 +1,13 @@
 import Light, { ConnectedLight, BaseLight } from '@lib/entities/lights'
-import { createStore, insert } from '@lib/util'
 import { DiscoverClient } from './'
 import { globalLights } from '../constants'
+import * as low from 'lowdb'
+import * as Sync from 'lowdb/adapters/FileAsync'
+
+const adapter = new Sync('db.json')
+const db = low<low.AdapterAsync<{ lights: Light[] }>>(adapter)
+
+;(async () => (await db).defaults({ lights: globalLights }).write())()
 
 type MakeConnect = (
   base: BaseLight,
@@ -15,17 +21,12 @@ const makeConnect: MakeConnect = (base, conf = {}) => {
     getStatus: () => 'something',
 
     setPower: async status => {
-      store.setState(state => ({
-        ...state,
-        lights: insert<Light>({
-          item: {
-            ...light,
-            connect: makeConnect(light, { status }),
-          },
-          into: state.lights,
-          usingIndex: x => x.id === light.id,
-        }),
-      }))
+      await (await db)
+        .get('lights')
+        .find({ id: light.id })
+        .assign({ status })
+        .write()
+      return
     },
 
     async setBrightness(int: number, opts: any) {},
@@ -34,17 +35,14 @@ const makeConnect: MakeConnect = (base, conf = {}) => {
   })
 }
 
-const store = createStore<{ lights: Light[] }>({
-  lights: globalLights.map(light => ({
-    ...light,
-    connect: makeConnect(light),
-  })),
-})
-
 export class MockClient implements DiscoverClient<Light> {
   async cleanup() {
     console.warn('TODO: Not implemented')
   }
 
-  discoverAllLights = async () => store.getState().lights
+  discoverAllLights = async () =>
+    (await db)
+      .get('lights')
+      .value()
+      .map(light => ({ ...light, connect: makeConnect(light) }))
 }
