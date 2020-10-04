@@ -5,7 +5,7 @@ import * as low from 'lowdb'
 import * as Sync from 'lowdb/adapters/FileAsync'
 
 const adapter = new Sync('db.json')
-const db = low<low.AdapterSync<{ lights: Light[] }>>(adapter)
+const db = low<low.AdapterAsync<{ lights: Light[] }>>(adapter)
 
 ;(async () => (await db).defaults({ lights: globalLights }).write())()
 
