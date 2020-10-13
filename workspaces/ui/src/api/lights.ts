@@ -1,6 +1,5 @@
+import { sendRequest } from '@smrt/utils'
 import { Light, PowerStatus } from 'types'
-
-import { sendRequest } from './'
 
 export const getAll = () =>
   sendRequest<Light[]>({ to: '/api/lights', handle: as => as.json() })

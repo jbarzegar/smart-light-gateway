@@ -1,26 +1,8 @@
 import * as React from 'react'
-import { Flex, Button, ButtonProps } from '@chakra-ui/core'
+import { Flex } from '@chakra-ui/core'
 import { PowerStatus } from 'types'
 
-type LightPowerButtonProps = { isActive: boolean } & ButtonProps
-const LightPowerButton = ({ isActive, ...props }: LightPowerButtonProps) => {
-  const variant = isActive
-    ? {
-        bg: 'gray.900',
-        color: 'white',
-      }
-    : {
-        bg: 'transparent',
-        color: 'gray.900',
-      }
-
-  const styles = {
-    ...variant,
-    border: '2px solid',
-    borderColor: 'gray.900',
-  }
-  return <Button {...props} {...styles} />
-}
+import { LightPowerButton } from './LightPowerButton'
 
 export const LightButtonRow = (
   _: Record<'onPowerOn' | 'onPowerOff', () => void> & {
