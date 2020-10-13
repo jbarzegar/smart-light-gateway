@@ -1,8 +1,7 @@
 import * as React from 'react'
 import { Flex } from '@chakra-ui/core'
 import { PowerStatus } from 'types'
-
-import { LightPowerButton } from './LightPowerButton'
+import { LightPowerButton } from 'components/LightPowerButton'
 
 export const LightButtonRow = (
   _: Record<'onPowerOn' | 'onPowerOff', () => void> & {
