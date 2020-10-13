@@ -14,7 +14,7 @@ export interface Light extends BaseDevice {
 
 /** All present queries existing in react-query's cache */
 export enum Queries {
-  discoveredLights,
+  discoveredLights = 'all lights',
 }
 type Device = Light
 
