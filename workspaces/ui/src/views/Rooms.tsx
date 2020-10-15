@@ -78,7 +78,6 @@ const AllRooms = () => {
   const history = useHistory()
   const match = useRouteMatch()
 
-  console.log(match.path)
   if (!rooms.length) {
     return (
       <>
