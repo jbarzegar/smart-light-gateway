@@ -78,6 +78,7 @@ const AllRooms = () => {
   const history = useHistory()
   const match = useRouteMatch()
 
+  console.log(match.path)
   if (!rooms.length) {
     return (
       <>
@@ -88,7 +89,7 @@ const AllRooms = () => {
             leftIcon="add"
             variant="outline"
             size="lg"
-            onClick={() => history.push(`${match.path}/new`)}
+            onClick={() => history.push(match.path + 'new')}
           >
             Create a room now
           </Button>
@@ -105,7 +106,7 @@ const AllRooms = () => {
           leftIcon="add"
           variant="ghost"
           size="lg"
-          onClick={() => history.push(`${match.path}/new`)}
+          onClick={() => history.push(match.path + 'new')}
         >
           Create room
         </Button>
@@ -185,7 +186,7 @@ const routes: RouterObject = {
     exact: true,
     component: AllRooms,
   },
-  new: {
+  '/new': {
     exact: true,
     component: NewRoom,
   },
@@ -198,7 +199,7 @@ export const RoomView = () => {
     <Container>
       <Switch>
         {Object.entries(routes).map(([path, props]) => (
-          <Route key={path} path={[match.path, path]} {...props} />
+          <Route key={path} path={match.path + path} {...props} />
         ))}
       </Switch>
     </Container>
