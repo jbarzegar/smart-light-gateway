@@ -14,6 +14,7 @@ import { CardGrid } from 'components/CardGrid'
 import { LightCard } from 'components/LightCard'
 import { Container } from 'components/Container'
 import { random, uniqueId, startCase } from 'lodash'
+import { RouterObject } from 'types'
 
 type Room = {
   id: string
@@ -27,18 +28,19 @@ type State = {
   createRoom(room: Omit<Room, 'devices' | 'id'>): void
 }
 
-const withLocalSync = (key: string, payload: any) => {
+function withLocalSync<T>(key: string, payload: T) {
   localStorage.setItem(key, JSON.stringify(payload))
   return payload
 }
 
-const getRooms = (): Room[] => {
+const fetchCachedRooms = (): Room[] => {
   const cache = localStorage.getItem('cachedRooms')
+
   return !cache ? [] : JSON.parse(cache)
 }
 
 const useRoomStore = createStore<State>(set => ({
-  rooms: getRooms(),
+  rooms: fetchCachedRooms(),
   createRoom: (room: Omit<Room, 'devices' | 'id'>) =>
     set(state => ({
       rooms: withLocalSync('cachedRooms', [
@@ -170,14 +172,26 @@ const NewRoom = () => {
   )
 }
 
+const routes: RouterObject = {
+  '/': {
+    exact: true,
+    component: AllRooms,
+  },
+  new: {
+    exact: true,
+    component: NewRoom,
+  },
+}
+
 export const RoomView = () => {
   const match = useRouteMatch()
 
   return (
     <Container>
       <Switch>
-        <Route exact path={match.path} component={AllRooms}></Route>
-        <Route exact path={`${match.path}/new`} component={NewRoom}></Route>
+        {Object.entries(routes).map(([path, props]) => (
+          <Route key={path} path={[match.path, path]} {...props} />
+        ))}
       </Switch>
     </Container>
   )
