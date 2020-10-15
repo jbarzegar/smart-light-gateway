@@ -1,5 +1,5 @@
 import * as React from 'react'
-import createStore from 'zustand'
+import createStore, { SetState } from 'zustand'
 import { Switch, Route, useRouteMatch, useHistory } from 'react-router-dom'
 import {
   Box,
@@ -23,11 +23,6 @@ type Room = {
   devices: { name: string }[]
 }
 
-type State = {
-  rooms: Room[]
-  createRoom(room: Omit<Room, 'devices' | 'id'>): void
-}
-
 function withLocalSync<T>(key: string, payload: T) {
   localStorage.setItem(key, JSON.stringify(payload))
   return payload
@@ -38,10 +33,17 @@ const fetchCachedRooms = (): Room[] => {
 
   return !cache ? [] : JSON.parse(cache)
 }
+type RoomState = {
+  rooms: Room[]
+  createRoom(room: Omit<Room, 'devices' | 'id'>): void
+}
+type StateSlice<T extends Record<string | number | symbol, unknown>> = (
+  set: SetState<T>
+) => T
 
-const useRoomStore = createStore<State>(set => ({
+const initRoomSlice: StateSlice<RoomState> = set => ({
   rooms: fetchCachedRooms(),
-  createRoom: (room: Omit<Room, 'devices' | 'id'>) =>
+  createRoom: room =>
     set(state => ({
       rooms: withLocalSync('cachedRooms', [
         ...state.rooms,
@@ -53,6 +55,12 @@ const useRoomStore = createStore<State>(set => ({
         },
       ]),
     })),
+})
+
+type Store = ReturnType<typeof initRoomSlice>
+
+const useRoomStore = createStore<Store>(set => ({
+  ...initRoomSlice(set),
 }))
 
 const makeLights = (len = 5) =>
