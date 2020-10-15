@@ -1,10 +1,12 @@
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
-import { Text, Box, SimpleGrid, Heading } from '@chakra-ui/core'
+import { Text, Heading } from '@chakra-ui/core'
 import { lights } from 'api'
 import { Light, PowerStatus, Queries } from 'types'
 import { setLightStatus } from 'effects'
 import { LightCard } from 'components/LightCard'
+import { CardGrid } from 'components/CardGrid'
+import { Container } from 'components/Container'
 
 const defaultData = new Array(10).fill(0).map<Light>((n, i) => ({
   id: `${i + 1}`,
@@ -48,7 +50,7 @@ export const Discovered = () => {
     )
 
   return (
-    <Box p={20} pt={0}>
+    <Container>
       {status === 'loading' && (
         <Heading fontSize="4xl">Discovering Lights...</Heading>
       )}
@@ -65,7 +67,7 @@ export const Discovered = () => {
         </>
       )}
 
-      <SimpleGrid columns={6} spacing={10} minChildWidth="250px">
+      <CardGrid>
         {allLights.map(light => (
           <LightCard
             isLoaded={status === 'success'}
@@ -74,7 +76,7 @@ export const Discovered = () => {
             onPowerBtnClick={handlePowerButtonClick}
           />
         ))}
-      </SimpleGrid>
-    </Box>
+      </CardGrid>
+    </Container>
   )
 }

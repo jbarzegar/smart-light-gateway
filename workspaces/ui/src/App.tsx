@@ -1,24 +1,17 @@
 import React from 'react'
-import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { Discovered } from 'views/Lights'
-
-/* type RouteItem = React.ComponentType | { [k: string]: React.ComponentType }
-type RouteMap = Record<string, RouteItem>
- */
-const routes = {
-  '/': () => <Redirect to="/lights" />,
-  '/lights': Discovered,
-}
+import { RoomView } from 'views/Rooms'
 
 const App = () => {
   return (
-    <>
-      <Router>
-        {Object.entries(routes).map(([path, Component]) => (
-          <Route key={`__key-${path}`} path={path} component={Component} />
-        ))}
-      </Router>
-    </>
+    <Router>
+      <Switch>
+        <Route exact path="/" component={() => <p>Dashboard</p>} />
+        <Route path="/lights" component={Discovered} />
+        <Route path="/rooms" component={RoomView} />
+      </Switch>
+    </Router>
   )
 }
 
