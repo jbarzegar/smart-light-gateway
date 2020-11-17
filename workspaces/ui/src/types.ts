@@ -1,3 +1,5 @@
+import { RouteProps } from 'react-router-dom'
+
 export type PowerStatus = 'off' | 'on'
 
 interface BaseDevice {
@@ -23,3 +25,5 @@ export interface Room {
   name: string
   devices: Device[]
 }
+
+export type RouterObject = Record<string, Omit<RouteProps, 'path'>>
