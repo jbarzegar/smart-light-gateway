@@ -1,23 +1,24 @@
 import { flow } from 'lodash'
-import { LightActions } from 'types'
-import { Gateway } from '@lib/gateway'
-import Light, {
+import {
+  Light,
   ConnectedLight,
   MethodOptions,
   PowerMode,
-} from '@lib/entities/lights'
-import { ID } from '@lib/util'
+  LightActions,
+} from 'types'
+import { Gateway } from '@lib/gateway'
 
-type InitActionFn<Actions> = (
-  gateway: Gateway,
-  config?: MethodOptions
-) => Actions
+type ID = string | number
 
 const defaultLightConf: MethodOptions = { timing: 500, transition: 'smooth' }
 
 const byId = (id: ID) => (x: Light) => id === x.id
 
-const initLightActions: InitActionFn<LightActions> = (
+type FnInitAction<Actions> = (
+  gateway: Gateway,
+  config?: MethodOptions
+) => Actions
+const initLightActions: FnInitAction<LightActions> = (
   gateway,
   conf = defaultLightConf
 ) => {

@@ -1,6 +1,7 @@
-import Light, { ConnectedLight, BaseLight } from '@lib/entities/lights'
-import { DiscoverClient } from './'
-import { globalLights } from '../constants'
+import { Light, ConnectedLight, BaseLight } from '@gateway/types/entities'
+import { DiscoverClient } from '@gateway/types/discoverClient'
+
+import { globalLights } from '../mockLights'
 import * as low from 'lowdb'
 import * as Sync from 'lowdb/adapters/FileAsync'
 
@@ -9,17 +10,17 @@ const db = low<low.AdapterAsync<{ lights: Light[] }>>(adapter)
 
 ;(async () => (await db).defaults({ lights: globalLights }).write())()
 
-type MakeConnect = (
+type FnMakeConnect = (
   base: BaseLight,
   conf?: Partial<BaseLight>
 ) => () => Promise<ConnectedLight>
-const makeConnect: MakeConnect = (base, conf = {}) => {
+const makeConnect: FnMakeConnect = (base, conf = {}) => {
   const light = { ...base, ...conf }
 
   return async () => ({
     ...light,
-    getStatus: () => 'something',
 
+    getStatus: () => 'something',
     setPower: async status => {
       await (await db)
         .get('lights')

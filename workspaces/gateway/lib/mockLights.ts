@@ -1,4 +1,4 @@
-import { BaseLight } from '@lib/entities/lights'
+import { BaseLight } from '@gateway/types/entities'
 
 export const globalLights: BaseLight[] = [
   {

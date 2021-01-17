@@ -1,0 +1,4 @@
+{
+  "extends": "../../config/tsconfig.json",
+  "files": ["entities.d.ts", "discoverClient.d.ts"]
+}
