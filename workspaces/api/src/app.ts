@@ -3,7 +3,7 @@ import api from './api'
 import initLightActions from './actions/lights'
 
 import { Gateway } from '@lib/gateway'
-import { MockClient } from '@gateway/clients'
+import { MockClient } from '@lib/clients'
 
 type ApiConf = Parameters<typeof api>[0]
 

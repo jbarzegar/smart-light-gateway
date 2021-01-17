@@ -4,7 +4,7 @@ import * as chalk from 'chalk'
 import { flow } from 'lodash'
 import * as morgan from 'morgan'
 import { Application, NextHandleFunction, Router, AppActions } from 'types'
-import logger from 'utils/logger'
+import logger from '@lib/logger'
 import useRouter from 'api/routes'
 const listEndpoints = require('express-list-endpoints')
 

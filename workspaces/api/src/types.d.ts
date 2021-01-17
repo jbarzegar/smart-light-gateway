@@ -1,5 +1,8 @@
 import { Router, Request, Response, NextFunction, Application } from 'express'
-import { Light, PowerMode } from '@gateway/types/entities'
+import { Light, PowerMode } from '@lib/entities'
+
+export * from '@lib/entities'
+export * from '@lib/discoverClient'
 
 export type ViewFn = (router: Router) => void
 
@@ -24,6 +27,3 @@ export type NextHandleFunction = (
 export type LightView<Actions extends { [key: string]: Function }> = (
   actions: Actions
 ) => Router
-
-export * from '@gateway/types/entities'
-export * from '@gateway/types/discoverClient'
