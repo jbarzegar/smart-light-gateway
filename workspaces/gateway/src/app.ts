@@ -3,12 +3,12 @@ import api from './api'
 import initLightActions from './actions/lights'
 
 import { Gateway } from '@lib/gateway'
-import { YeelightDiscoveryClient } from '@gateway/client-yeelight'
+import { MockClient } from '@gateway/clients'
 
 type ApiConf = Parameters<typeof api>[0]
 
 const getLightActions = flow(
-  () => new YeelightDiscoveryClient(),
+  () => new MockClient(),
   client => new Gateway(client),
   gateway => initLightActions(gateway)
 )

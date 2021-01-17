@@ -1,12 +1,14 @@
 {
-  "name": "@gateway/client-yeelight",
+  "name": "@gateway/clients",
   "version": "0.0.1",
   "main": "index.ts",
   "dependencies": {
     "@gateway/types": "^1.0.0",
     "@types/lodash": "^4.14.167",
+    "@types/lowdb": "^1.0.9",
     "color": "^3.1.3",
     "lodash": "^4.17.20",
+    "lowdb": "^1.0.0",
     "yeelight-awesome": "^1.0.12"
   }
 }

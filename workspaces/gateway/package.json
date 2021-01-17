@@ -5,7 +5,7 @@
   "author": "James Barzegar",
   "license": "MIT",
   "dependencies": {
-    "@gateway/client-yeelight": "0.0.1",
+    "@gateway/clients": "0.0.1",
     "@gateway/types": "1.0.0",
     "@gateway/utils": "1.0.0",
     "@types/lowdb": "^1.0.9",

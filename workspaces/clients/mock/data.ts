@@ -1,0 +1,88 @@
+import { BaseLight } from '@gateway/types/entities'
+
+export const mockLights: BaseLight[] = [
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-0',
+    id: '8d45311b-d4a2-444c-87cc-c48a417bac2c',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-1',
+    id: '180ac656-cc5f-4e26-866c-e5602d2928ec',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-2',
+    id: 'f12f6bec-7705-4429-8869-b26c27f9c159',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-3',
+    id: 'e7d1cb06-7996-4eb6-bd98-670d7ef220cf',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-4',
+    id: 'c53029f7-b538-40c4-b2f4-21ccd6b2d9f9',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-5',
+    id: '1bd5eeff-0813-4033-b62f-6e7050b5aec0',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-6',
+    id: '1151daec-6d98-41a7-8659-f5e0c2221ca4',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-7',
+    id: '189b5ffb-dbd8-46dd-9b03-ade9f2319143',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-8',
+    id: '2386282a-e906-4e12-949f-b767da065557',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-9',
+    id: 'e5e6c316-5a4e-4ee6-b1bb-9e28b0cfd16f',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-10',
+    id: '53dbe32d-3d51-4a5f-96f2-5d5a673b90df',
+  },
+  {
+    host: '0.0.0.0',
+    port: 420,
+    status: 'off',
+    name: 'mocked-light-11',
+    id: '57a023e1-e7c3-4e8d-8d44-7bc7bea2fbc2',
+  },
+]

@@ -3,7 +3,7 @@ import * as _Color from 'color'
 import { pick } from 'lodash'
 
 import { Light } from '@gateway/types/entities'
-import { toRGB } from './util'
+import { toRGB } from '../util'
 
 const devicePickKeys = ['host', 'id', 'port', 'status'] as const
 
