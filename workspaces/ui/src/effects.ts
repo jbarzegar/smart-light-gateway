@@ -1,5 +1,5 @@
 import { queryCache } from 'react-query'
-import { updateElement } from '@smrt/utils'
+import { updateElement } from '@gateway/utils'
 import { Light, PowerStatus, Queries } from 'types'
 
 type Setter<T> = (state: T) => T

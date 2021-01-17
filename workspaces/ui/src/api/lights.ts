@@ -1,4 +1,4 @@
-import { sendRequest } from '@smrt/utils'
+import { sendRequest } from '@gateway/utils'
 import { Light, PowerStatus } from 'types'
 
 export const getAll = () =>
