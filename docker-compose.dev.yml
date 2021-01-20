@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  habridge:
+    image: ghcr.io/linuxserver/habridge
+    container_name: habridge
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - SEC_KEY=${RANDOM}
+      - TZ=America/Toronto
+    ports:
+      - 8080:8080
+      - 50000:50000
+    restart: unless-stopped
