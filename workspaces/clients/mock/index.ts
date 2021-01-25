@@ -39,7 +39,7 @@ const makeConnect: FnMakeConnect = (base, conf = {}) => {
 
 export class MockClient implements DiscoverClient<Light> {
   async cleanup() {
-    console.warn('TODO: Not implemented')
+    return
   }
 
   discoverAllLights = async () =>

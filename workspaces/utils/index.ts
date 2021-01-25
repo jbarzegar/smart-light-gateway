@@ -40,10 +40,11 @@ type SendRequestParams = {
 };
 export function sendRequest<T = unknown>(
   { to: from, handle }: SendRequestParams,
-  options: RequestInit = defaultRequestObj
+  options: RequestInit = defaultRequestObj as RequestInit,
+  __fetchLike: typeof global.fetch = fetch
 ): Promise<T> {
   return new Promise((resolve, reject) =>
-    fetch(from, { ...defaultRequestObj, ...options })
+    __fetchLike(from, { ...defaultRequestObj, ...options })
       .then((resp) => (resp.ok ? handle(resp) : reject(resp)))
       .then((_) => resolve(_))
       .catch((err) => reject(err))

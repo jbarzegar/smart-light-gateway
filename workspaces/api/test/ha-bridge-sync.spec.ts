@@ -1,4 +1,6 @@
-const TEST_URL = 'http://localhost:100'
+import { createBridgeSync } from '../lib/ha-bridge-sync'
+
+const TEST_URL = 'http://localhost:8080'
 
 const validPayload = {
   name: 'device',
@@ -23,8 +25,19 @@ const item = [
   },
 ]
 
-test('ha-bridge sync', () => {
+describe('ha-bridge sync', () => {
+  it('should connect to', async () => {
+    const expectedApiVersion = '1.17.0'
+    const expectedName = 'HA-Bridge'
+
+    const bridge = createBridgeSync('http://localhost:8080')
+    const info = await bridge.getInfo()
+    expect(info.version.api).toEqual(expectedApiVersion)
+    expect(info.name).toEqual(expectedName)
+  })
+
   it.todo('should create a new device')
   it.todo('should update an existing device')
   it.todo('should delete an existing device')
+  it.todo('should be able to resync with new/fragmented ha-bridge instance')
 })

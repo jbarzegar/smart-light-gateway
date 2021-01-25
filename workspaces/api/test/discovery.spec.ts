@@ -1,5 +1,5 @@
 import { Gateway, Discoverer } from '../lib/gateway'
-import { MockClient } from '../lib/discoverClient/__mock'
+import { MockClient } from '../lib/clients'
 
 describe('#discovery', () => {
   async function testPower(status: 'on' | 'off') {
