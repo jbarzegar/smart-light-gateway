@@ -1,3 +1,8 @@
+export type Bridge = {
+  getInfo(): Promise<BridgeInfo>
+  devices: BridgeDevices
+}
+
 export type XAction<A extends string = string, P extends any = any> = {
   name: A
   payload: P
@@ -11,7 +16,10 @@ export interface BridgeDevices {
   create<T extends XAction>(device: NewDevice<T>): Promise<unknown>
 }
 
+export type FnCreateBridgeSync = (url: string) => Bridge
+
 export type FnGetInfo = (url: string) => () => Promise<BridgeInfo>
+
 export type FnMapBridgeInfo<Response extends { [key: string]: any }> = (
   response: Response
 ) => BridgeInfo

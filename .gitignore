@@ -1,3 +1,4 @@
 build/
 node_modules
 lights.json
+.DS_Store
