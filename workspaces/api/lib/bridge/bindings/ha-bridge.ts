@@ -1,6 +1,7 @@
 import fetch from 'node-fetch'
+import { FnGetInfo, FnMapBridgeInfo } from '../types'
 
-type HaBridgePingAPIResponse = {
+export type HaBridgePingAPIResponse = {
   lights: Record<string, unknown>
   scenes: Record<string, unknown>
   groups: Record<string, unknown>
@@ -42,26 +43,7 @@ type HaBridgePingAPIResponse = {
   }
 }
 
-type BridgeInfo = {
-  name: string
-  modelId: string
-  bridgeId: string
-  gateway: string
-  macAddress: string
-  ipAddress: string
-  version: {
-    api: string
-    software: string
-  }
-  time: {
-    zone: string
-    utc: Date
-    local: Date
-  }
-}
-
-type FnMapBridgeInfo = (response: HaBridgePingAPIResponse) => BridgeInfo
-const mapBridgeInfo: FnMapBridgeInfo = data => ({
+export const mapBridgeInfo: FnMapBridgeInfo<HaBridgePingAPIResponse> = data => ({
   bridgeId: data.config.bridgeid,
   gateway: data.config.gateway,
   ipAddress: data.config.ipaddress,
@@ -79,25 +61,13 @@ const mapBridgeInfo: FnMapBridgeInfo = data => ({
   },
 })
 
-type Bridge = {
-  getInfo(): Promise<BridgeInfo>
-}
-
-type FnGetInfo = (url: string) => () => Promise<BridgeInfo>
-const getInfo: FnGetInfo = url => () =>
+export const getInfo: FnGetInfo = url => () =>
   new Promise((resolve, reject) =>
     fetch(`${url}/api/ping`, {
       headers: { Accept: 'application/json' },
     })
       .then(resp => resp.json())
-      .then((data: HaBridgePingAPIResponse) => mapBridgeInfo(data))
+      .then(mapBridgeInfo)
       .then(info => resolve(info))
       .catch(e => reject(e))
   )
-
-type FnCreateBridgeSync = (url: string) => Bridge
-export const createBridgeSync: FnCreateBridgeSync = url => {
-  return {
-    getInfo: getInfo(url),
-  }
-}
