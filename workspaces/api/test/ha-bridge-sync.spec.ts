@@ -1,5 +1,15 @@
 import { createBridgeSync } from '../lib/bridge'
-import { XAction } from '../lib/bridge/types'
+import { bindings as haBridgeBindings } from '../lib/bridge/bindings/ha-bridge'
+import { XAction, FnCreateBindings } from '../lib/bridge/types'
+
+const mockBindings: FnCreateBindings = deps => {
+  return {
+    createLight: jest.fn(),
+    updateLight: jest.fn(),
+    deleteLight: jest.fn(),
+    getInfo: jest.fn(),
+  }
+}
 
 const TEST_URL = 'http://localhost:8080'
 
@@ -28,7 +38,9 @@ const item = [
 
 describe('ha-bridge sync', () => {
   const setupTest = () => {
-    const bridge = createBridgeSync('http://localhost:8080')
+    const bridge = createBridgeSync(
+      haBridgeBindings({ apiUrl: 'http://localhost:8080' })
+    )
 
     return { bridge }
   }
@@ -50,7 +62,7 @@ describe('ha-bridge sync', () => {
       | XAction<'SET_COLOR', Record<'r' | 'g' | 'b', string>>
       | XAction<'SET_BRIGHTNESS', string>
 
-    const newDevice = await bridge.devices.create<DeviceActions>({
+    const newDevice = await bridge.device.create<DeviceActions>({
       name: 'butts',
       onActions: [{ name: 'SET_POWER', payload: 'on' }],
       offActions: [{ name: 'SET_POWER', payload: 'off' }],

@@ -1,9 +1,10 @@
-import { getInfo } from './bindings/ha-bridge'
-import { FnCreateBridgeSync } from './types'
+import { Bridge, BridgeBindings } from './types'
 
-export const createBridgeSync: FnCreateBridgeSync = url => {
+type FnCreateBridgeSync = (bindings: BridgeBindings) => Bridge
+export const createBridgeSync: FnCreateBridgeSync = bindings => {
+  const { getInfo, createLight } = bindings
   return {
-    getInfo: getInfo(url),
-    devices: { create: async device => device },
+    getInfo,
+    device: { create: createLight },
   }
 }

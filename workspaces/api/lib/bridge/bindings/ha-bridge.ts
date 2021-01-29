@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { FnGetInfo, FnMapBridgeInfo } from '../types'
+import { FnCreateBindings, FnMapBridgeInfo } from '../types'
 
 export type HaBridgePingAPIResponse = {
   lights: Record<string, unknown>
@@ -61,13 +61,24 @@ export const mapBridgeInfo: FnMapBridgeInfo<HaBridgePingAPIResponse> = data => (
   },
 })
 
-export const getInfo: FnGetInfo = url => () =>
-  new Promise((resolve, reject) =>
-    fetch(`${url}/api/ping`, {
-      headers: { Accept: 'application/json' },
-    })
-      .then(resp => resp.json())
-      .then(mapBridgeInfo)
-      .then(info => resolve(info))
-      .catch(e => reject(e))
-  )
+export const bindings: FnCreateBindings = ({ apiUrl }) => ({
+  getInfo: () =>
+    new Promise((resolve, reject) =>
+      fetch(`${apiUrl}/api/ping`, {
+        headers: { Accept: 'application/json' },
+      })
+        .then(resp => resp.json())
+        .then(mapBridgeInfo)
+        .then(info => resolve(info))
+        .catch(e => reject(e))
+    ),
+  createLight() {
+    throw new Error('not implemented')
+  },
+  updateLight() {
+    throw new Error('not implemented')
+  },
+  deleteLight() {
+    throw new Error('not implemented')
+  },
+})
