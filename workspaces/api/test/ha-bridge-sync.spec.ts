@@ -1,4 +1,5 @@
-import { createBridgeSync, XAction } from '../lib/bridge'
+import { createBridgeSync } from '../lib/bridge'
+import { XAction } from '../lib/bridge/types'
 
 const TEST_URL = 'http://localhost:8080'
 
@@ -48,6 +49,7 @@ describe('ha-bridge sync', () => {
       | XAction<'SET_POWER', 'off' | 'on'>
       | XAction<'SET_COLOR', Record<'r' | 'g' | 'b', string>>
       | XAction<'SET_BRIGHTNESS', string>
+
     const newDevice = await bridge.devices.create<DeviceActions>({
       name: 'butts',
       onActions: [{ name: 'SET_POWER', payload: 'on' }],
