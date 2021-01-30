@@ -61,7 +61,11 @@ export const mapBridgeInfo: FnMapBridgeInfo<HaBridgePingAPIResponse> = data => (
   },
 })
 
-export const bindings: FnCreateBindings = ({ apiUrl }) => ({
+type HaBridgeBindingDeps = { apiUrl: string }
+
+export const bindings: FnCreateBindings<HaBridgeBindingDeps> = ({
+  apiUrl,
+}) => ({
   getInfo: () =>
     new Promise((resolve, reject) =>
       fetch(`${apiUrl}/api/ping`, {
@@ -72,13 +76,13 @@ export const bindings: FnCreateBindings = ({ apiUrl }) => ({
         .then(info => resolve(info))
         .catch(e => reject(e))
     ),
-  createLight() {
+  createDevice() {
     throw new Error('not implemented')
   },
-  updateLight() {
+  updateDevice() {
     throw new Error('not implemented')
   },
-  deleteLight() {
+  deleteDevice() {
     throw new Error('not implemented')
   },
 })

@@ -1,52 +1,98 @@
 import { createBridgeSync } from '../lib/bridge'
-import { bindings as haBridgeBindings } from '../lib/bridge/bindings/ha-bridge'
-import { XAction, FnCreateBindings } from '../lib/bridge/types'
+import {
+  XAction,
+  FnCreateBindings,
+  FnCreateDevice,
+  BridgeDevice,
+  BridgeInfo,
+} from '../lib/bridge/types'
+import { nanoid as genId } from 'nanoid'
 
-const mockBindings: FnCreateBindings = deps => {
+type MockDeviceActions =
+  | XAction<'SET_POWER', 'off' | 'on'>
+  | XAction<'SET_COLOR', Record<'r' | 'g' | 'b', string>>
+  | XAction<'SET_BRIGHTNESS', string>
+
+const mockInfo: BridgeInfo = {
+  bridgeId: genId(),
+  gateway: 'asdf',
+  ipAddress: 'asdf',
+  macAddress: 'asdf',
+  modelId: genId(),
+  name: 'asdf',
+  time: {
+    local: new Date(),
+    utc: new Date(new Date().toUTCString()),
+    zone: 'America/Toronto',
+  },
+  version: {
+    api: '0',
+    software: '0',
+  },
+}
+
+type MockDeps = Partial<{
+  verbose: boolean
+  shouldFail: boolean
+}>
+type MockDevice = BridgeDevice<MockDeviceActions>
+
+const setupMockBindings: FnCreateBindings<MockDeps, MockDeviceActions> = (
+  deps = {}
+) => {
+  const { shouldFail = false, verbose = false } = deps
+
+  let devices: Record<string, MockDevice> = {}
+
   return {
-    createLight: jest.fn(),
-    updateLight: jest.fn(),
-    deleteLight: jest.fn(),
-    getInfo: jest.fn(),
+    async createDevice(device) {
+      const id = genId()
+      const data: MockDevice = {
+        id,
+        name: device.name,
+        colorActions: device.colorActions,
+        dimActions: device.dimActions,
+        offActions: device.offActions,
+        onActions: device.onActions,
+      }
+
+      devices[id] = data
+
+      if (verbose) {
+        console.log('[createLight] created new device: ', devices)
+      }
+
+      return data
+    },
+    async updateDevice(id, data) {
+      const l = devices[id]
+
+      if (!l) throw new Error(`could not find device with id: ${id}`)
+
+      const updatedLight: MockDevice = { ...l, ...data }
+
+      devices[id] = updatedLight
+
+      return updatedLight
+    },
+    async deleteDevice() {
+      return { deleted: !shouldFail }
+    },
+    getInfo: async () => mockInfo,
   }
 }
 
-const TEST_URL = 'http://localhost:8080'
-
-const validApiPayload = {
-  name: 'device',
-  offUrl:
-    '[{"item":"http://localhost:100/${device.description}","type":"httpDevice","httpVerb":"POST","httpBody":"{ \\"action\\": \\"SET_POWER\\", \\"payload\\": \\"off\\" }","contentType":"application/json"}]',
-  dimUrl:
-    '[{"item":"http://localhost:100/${device.description}","type":"httpDevice","httpVerb":"POST","httpBody":"{\\n  \\"action\\": \\"SET_BRIGHTNESS\\",\\n  \\"payload\\": ${colorbri} \\n}","contentType":"application/json"}]',
-  onUrl:
-    '[{"item":"http://localhost:100/${device.description}","type":"httpDevice","httpVerb":"POST","httpBody":"{ \\"action\\": \\"SET_POWER\\", \\"payload\\": \\"on\\" }","contentType":"application/json"}]',
-  colorUrl:
-    '[{"item":"http://localhost:100/${device.description}","httpVerb":"POST","httpBody":"{ \\n  \\"action\\": \\"SET_COLOR\\", \\n  \\"payload\\": { \\"r\\": ${color.r}, \\"g\\": ${color.g}, \\"b\\": ${color.b} \\n}","contentType":"application/json","type":"httpDevice"}]',
-  description: 'f50edd33-a701-48d3-ac56-03a4cd3f2ede',
-}
-
-const item = [
-  {
-    item: 'http://localhost:100/${device.description}',
-    type: 'httpDevice',
-    httpVerb: 'POST',
-    httpBody: { action: 'SET_POWER', payload: 'off' },
-    contentType: 'application/json',
-  },
-]
-
-describe('ha-bridge sync', () => {
+describe('bridge interface', () => {
   const setupTest = () => {
-    const bridge = createBridgeSync(
-      haBridgeBindings({ apiUrl: 'http://localhost:8080' })
-    )
+    const bridge = createBridgeSync(setupMockBindings({}))
 
     return { bridge }
   }
-  it('should connect to', async () => {
-    const expectedApiVersion = '1.17.0'
-    const expectedName = 'HA-Bridge'
+
+  it('should get info', async () => {
+    const { version, name: expectedName } = mockInfo
+    const expectedApiVersion = version.api
+
     const { bridge } = setupTest()
 
     const info = await bridge.getInfo()
@@ -54,32 +100,63 @@ describe('ha-bridge sync', () => {
     expect(info.name).toEqual(expectedName)
   })
 
-  it('should create a new device', async () => {
-    const { bridge } = setupTest()
+  it.todo('should be able to resync with new/fragmented ha-bridge instance')
 
-    type DeviceActions =
-      | XAction<'SET_POWER', 'off' | 'on'>
-      | XAction<'SET_COLOR', Record<'r' | 'g' | 'b', string>>
-      | XAction<'SET_BRIGHTNESS', string>
+  describe('device management', () => {
+    const [deviceParams]: Parameters<FnCreateDevice<MockDeviceActions>> = [
+      {
+        name: 'butts',
+        onActions: [{ name: 'SET_POWER', payload: 'on' }],
+        offActions: [{ name: 'SET_POWER', payload: 'off' }],
+        dimActions: [
+          { name: 'SET_BRIGHTNESS', payload: '${device.intensity}' },
+        ],
+        colorActions: [
+          {
+            name: 'SET_COLOR',
+            payload: { r: '${color.r}', g: '${color.g}', b: '${color.b}' },
+          },
+        ],
+      },
+    ]
 
-    const newDevice = await bridge.device.create<DeviceActions>({
-      name: 'butts',
-      onActions: [{ name: 'SET_POWER', payload: 'on' }],
-      offActions: [{ name: 'SET_POWER', payload: 'off' }],
-      dimActions: [{ name: 'SET_BRIGHTNESS', payload: '${device.intensity}' }],
-      colorActions: [
-        {
-          name: 'SET_COLOR',
-          payload: { r: '${color.r}', g: '${color.g}', b: '${color.b}' },
-        },
-      ],
+    it('should create a new device', async () => {
+      const { bridge } = setupTest()
+      const spy = jest.spyOn(bridge.device, 'create')
+
+      const device = await bridge.device.create<MockDeviceActions>(deviceParams)
+
+      expect(spy).toHaveBeenCalledWith(deviceParams)
+      // We should get back an id of some sort
+      expect(typeof device.id).toBe('string')
+      expect(device.name).toMatch(deviceParams.name)
+    })
+    it('should update an existing device', async () => {
+      const { bridge } = setupTest()
+      const { id } = await bridge.device.create<MockDeviceActions>(deviceParams)
+
+      const spy = jest.spyOn(bridge.device, 'update')
+      const updateData = { name: 'cool updated thingy' }
+      const device = await bridge.device.update<MockDeviceActions>(
+        id,
+        updateData
+      )
+
+      expect(spy).toHaveBeenCalledWith(id, updateData)
+      expect(device.id).toMatch(id)
+      expect(device.name).toMatch(updateData.name)
     })
 
-    // TODO: Do a test
-    // We should get back an id of some sort
-    // along with the name
+    it('should delete an existing device', async () => {
+      const { bridge } = setupTest()
+      const { id } = await bridge.device.create<MockDeviceActions>(deviceParams)
+
+      const spy = jest.spyOn(bridge.device, 'delete')
+
+      await bridge.device.delete(id)
+
+      expect(spy).toHaveBeenCalledWith(id)
+      expect(spy).not.toThrowError()
+    })
   })
-  it.todo('should update an existing device')
-  it.todo('should delete an existing device')
-  it.todo('should be able to resync with new/fragmented ha-bridge instance')
 })

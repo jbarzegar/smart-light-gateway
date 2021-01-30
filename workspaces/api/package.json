@@ -22,13 +22,13 @@
     "lowdb": "^1.0.0",
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
+    "nanoid": "^3.1.20",
     "node-fetch": "^2.6.1",
-    "uuid": "^8.3.0",
     "yeelight-awesome": "^1.0.12"
   },
   "scripts": {
     "start": "NODE_ENV=development tsnd --respawn src/bootstrap.ts",
-    "test": "jest --watchAll"
+    "test": "jest"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.10.4",
@@ -38,7 +38,6 @@
     "@types/jest": "^26.0.10",
     "@types/lodash": "^4.14.160",
     "@types/module-alias": "^2.0.0",
-    "@types/uuid": "^8.3.0",
     "babel-plugin-lodash": "^3.3.4",
     "dependency-cruiser": "^9.21.6",
     "husky": "^4.3.0",
