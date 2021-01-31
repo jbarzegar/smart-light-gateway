@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { FnCreateBindings, FnMapBridgeInfo } from '../types'
+import { FnCreateBindings, FnMapBridgeInfo, XAction } from '../types'
 
 export type HaBridgePingAPIResponse = {
   lights: Record<string, unknown>
@@ -63,7 +63,7 @@ export const mapBridgeInfo: FnMapBridgeInfo<HaBridgePingAPIResponse> = data => (
 
 type HaBridgeBindingDeps = { apiUrl: string }
 
-export const bindings: FnCreateBindings<HaBridgeBindingDeps> = ({
+export const bindings: FnCreateBindings<HaBridgeBindingDeps, XAction> = ({
   apiUrl,
 }) => ({
   getInfo: () =>

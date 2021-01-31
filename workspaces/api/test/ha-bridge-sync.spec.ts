@@ -1,4 +1,4 @@
-import { createBridgeSync } from '../lib/bridge'
+import { createBridgeInstance } from '../lib/bridge'
 import {
   XAction,
   FnCreateBindings,
@@ -45,6 +45,13 @@ const setupMockBindings: FnCreateBindings<MockDeps, MockDeviceActions> = (
   let devices: Record<string, MockDevice> = {}
 
   return {
+    async getDevice(id) {
+      const device = devices[id]
+
+      if (!device) throw new Error(`could not get device with id of: ${id}`)
+
+      return device
+    },
     async createDevice(device) {
       const id = genId()
       const data: MockDevice = {
@@ -84,7 +91,7 @@ const setupMockBindings: FnCreateBindings<MockDeps, MockDeviceActions> = (
 
 describe('bridge interface', () => {
   const setupTest = () => {
-    const bridge = createBridgeSync(setupMockBindings({}))
+    const bridge = createBridgeInstance(setupMockBindings({}))
 
     return { bridge }
   }
@@ -124,23 +131,34 @@ describe('bridge interface', () => {
       const { bridge } = setupTest()
       const spy = jest.spyOn(bridge.device, 'create')
 
-      const device = await bridge.device.create<MockDeviceActions>(deviceParams)
+      const device = await bridge.device.create(deviceParams)
 
       expect(spy).toHaveBeenCalledWith(deviceParams)
       // We should get back an id of some sort
       expect(typeof device.id).toBe('string')
       expect(device.name).toMatch(deviceParams.name)
     })
+    it('should fetch a device', async () => {
+      const { bridge } = setupTest()
+      const { id, name } = await bridge.device.create(deviceParams)
+
+      const spy = jest.spyOn(bridge.device, 'get')
+
+      const device = await bridge.device.get(id)
+
+      expect(spy).toHaveBeenCalledWith(id)
+      // We should get back an id of some sort
+      expect(device.id).toMatch(id)
+      expect(device.name).toMatch(name)
+    })
+
     it('should update an existing device', async () => {
       const { bridge } = setupTest()
-      const { id } = await bridge.device.create<MockDeviceActions>(deviceParams)
+      const { id, name } = await bridge.device.create(deviceParams)
 
       const spy = jest.spyOn(bridge.device, 'update')
       const updateData = { name: 'cool updated thingy' }
-      const device = await bridge.device.update<MockDeviceActions>(
-        id,
-        updateData
-      )
+      const device = await bridge.device.update(id, updateData)
 
       expect(spy).toHaveBeenCalledWith(id, updateData)
       expect(device.id).toMatch(id)
@@ -149,7 +167,7 @@ describe('bridge interface', () => {
 
     it('should delete an existing device', async () => {
       const { bridge } = setupTest()
-      const { id } = await bridge.device.create<MockDeviceActions>(deviceParams)
+      const { id } = await bridge.device.create(deviceParams)
 
       const spy = jest.spyOn(bridge.device, 'delete')
 

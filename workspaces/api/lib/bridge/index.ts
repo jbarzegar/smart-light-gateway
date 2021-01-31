@@ -1,10 +1,16 @@
-import { Bridge, BridgeBindings } from './types'
+import { Bridge, BridgeBindings, XAction } from './types'
 
-type FnCreateBridgeSync = (bindings: BridgeBindings) => Bridge
-export const createBridgeSync: FnCreateBridgeSync = bindings => {
+/** Instantiates a bridge instance utilizing the bindings provided in order to trigger real world effects */
+type FnCreateBridgeInstance = <Actions extends XAction>(
+  bindings: BridgeBindings<Actions>
+) => Bridge<Actions>
+
+/** Instantiates a bridge instance utilizing the bindings provided in order to trigger real world effects */
+export const createBridgeInstance: FnCreateBridgeInstance = bindings => {
   return {
     getInfo: bindings.getInfo,
     device: {
+      get: bindings.getDevice,
       create: bindings.createDevice,
       update: bindings.updateDevice,
       delete: async (...args) => {
