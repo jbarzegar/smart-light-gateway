@@ -79,6 +79,9 @@ export const bindings: FnCreateBindings<HaBridgeBindingDeps, XAction> = ({
   createDevice() {
     throw new Error('not implemented')
   },
+  getDevice() {
+    throw new Error('not implemented')
+  },
   updateDevice() {
     throw new Error('not implemented')
   },

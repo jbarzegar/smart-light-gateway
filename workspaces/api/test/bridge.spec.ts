@@ -154,10 +154,11 @@ describe('bridge interface', () => {
 
     it('should update an existing device', async () => {
       const { bridge } = setupTest()
-      const { id, name } = await bridge.device.create(deviceParams)
+      const { id } = await bridge.device.create(deviceParams)
 
       const spy = jest.spyOn(bridge.device, 'update')
       const updateData = { name: 'cool updated thingy' }
+
       const device = await bridge.device.update(id, updateData)
 
       expect(spy).toHaveBeenCalledWith(id, updateData)
