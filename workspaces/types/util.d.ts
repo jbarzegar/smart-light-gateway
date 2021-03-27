@@ -1,4 +1,4 @@
-export type ID = string | number
+export type ID = string
 
 export type PrimitiveObject<
   V = any,
