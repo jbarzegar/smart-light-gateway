@@ -1,4 +1,3 @@
-import { nanoid } from '@reduxjs/toolkit'
 import { Meta, Story } from '@storybook/react'
 
 import { actions } from './Rooms.state'
@@ -19,7 +18,7 @@ const createWithRoomStore = () => {
     { name: 'Bedroom' },
     { name: 'Bathroom' },
     { name: 'Upstairs office', description: 'Office way in the back' },
-  ].map(x => ({ ...x, id: nanoid(), attachedDeviceIds: [] }))
+  ].map(x => ({ ...x, attachedDeviceIds: [] }))
 
   s.dispatch(actions.createMany(roomData))
 
