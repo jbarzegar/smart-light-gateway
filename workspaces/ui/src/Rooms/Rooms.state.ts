@@ -1,10 +1,10 @@
 import { createSlice, createEntityAdapter } from '@reduxjs/toolkit'
 
-type Room = {
+export type Room = {
   id: string
   name: string
   description?: string
-  /** A list of attachedDeviceIds */
+  /** Contains a collection of `Device` ids to map `Device` entities via another selector */
   attachedDeviceIds: string[]
 }
 
@@ -18,5 +18,7 @@ export const { actions, reducer, name } = createSlice({
   initialState: adapter.getInitialState(),
   reducers: {
     create: adapter.addOne,
+    createMany: adapter.addMany,
+    remove: adapter.removeOne,
   },
 })

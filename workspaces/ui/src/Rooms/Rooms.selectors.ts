@@ -1,5 +1,5 @@
-import { State } from 'state/store'
-import { adapter } from './slice'
+import { State } from 'global/store'
+import { adapter } from './Rooms.state'
 
 export const {
   selectAll,

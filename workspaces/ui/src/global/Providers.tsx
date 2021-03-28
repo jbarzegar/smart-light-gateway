@@ -4,6 +4,7 @@ import { Provider as ReduxProvider } from 'react-redux'
 import { ChakraProvider, theme } from '@chakra-ui/react'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import { QueryClient, QueryClientProvider } from 'react-query'
+
 import { isEnv } from 'utils'
 
 export const ThemeProvider = (props: PropsWithChildren<{}>) => (
@@ -11,8 +12,12 @@ export const ThemeProvider = (props: PropsWithChildren<{}>) => (
 )
 
 export const StateProvider = (
-  props: PropsWithChildren<{ store: EnhancedStore }>
-) => <ReduxProvider {...props} />
+  props: PropsWithChildren<{
+    store: EnhancedStore
+  }>
+) => {
+  return <ReduxProvider {...props} />
+}
 
 export const QueryProvider = (
   props: PropsWithChildren<{ queryClient: QueryClient }>

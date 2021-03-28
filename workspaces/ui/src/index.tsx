@@ -4,12 +4,13 @@ import { QueryClient } from 'react-query'
 import { Provider as ReduxProvider } from 'react-redux'
 
 import App from 'App'
-import { store } from 'state'
-import { ThemeProvider, QueryProvider } from 'Providers'
+import { createStore } from 'global/store'
+import { ThemeProvider, QueryProvider } from 'global/Providers'
 
 import reportWebVitals from './reportWebVitals'
 
 const queryClient = new QueryClient()
+const store = createStore()
 
 ReactDOM.render(
   <React.StrictMode>
