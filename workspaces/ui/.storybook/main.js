@@ -1,4 +1,5 @@
 const path = require('path')
+const override = require('../webpackOverride')
 
 const toPath = p => path.join(__dirname, '../../../', p)
 
@@ -11,7 +12,7 @@ module.exports = {
     '@storybook/preset-create-react-app',
   ],
   webpackFinal: async config => {
-    return {
+    const c = {
       ...config,
       resolve: {
         ...config.resolve,
@@ -23,5 +24,6 @@ module.exports = {
         },
       },
     }
+    return override(c)
   },
 }

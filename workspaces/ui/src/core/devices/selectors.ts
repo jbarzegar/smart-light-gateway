@@ -1,5 +1,5 @@
 import { State } from 'global/store'
-import { adapter } from './Rooms.state'
+import { adapter } from './state'
 
 export const {
   selectAll,
@@ -7,4 +7,4 @@ export const {
   selectEntities,
   selectIds,
   selectTotal,
-} = adapter.getSelectors<State>(x => x.rooms)
+} = adapter.getSelectors<State>(s => s.devices)

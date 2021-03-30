@@ -1,4 +1,4 @@
-import { NewRoom, Room } from './Rooms.state'
+import { NewRoom, Room } from './state'
 import { nanoid } from '@reduxjs/toolkit'
 
 export const mapNewRoom = (payload: NewRoom): Room => ({

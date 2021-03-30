@@ -9,14 +9,14 @@ export type Device = Light
 
 export const adapter = createEntityAdapter<Device>({
   selectId: x => x.id,
-  sortComparer: (a, b) => a.id.localeCompare(b.id),
+  sortComparer: (a, b) => (a.name || '').localeCompare(b.name || ''),
 })
 
 export const { actions, name, reducer } = createSlice({
   name: 'devices',
   initialState: adapter.getInitialState(),
   reducers: {
-    add: adapter.addOne,
+    create: adapter.addOne,
     remove: adapter.removeOne,
     hydrate: adapter.addMany,
   },
