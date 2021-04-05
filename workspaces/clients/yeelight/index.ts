@@ -6,19 +6,19 @@ import {
 } from 'yeelight-awesome'
 import * as Color from 'color'
 import { pick } from 'lodash'
-import { Light } from '@gateway/types/entities'
-import { DiscoverClient } from '@gateway/types/discoverClient'
+import { LightClientDisconnected, DiscoverClient } from '@gateway/types'
 
 const devicePickKeys = ['host', 'id', 'port', 'status'] as const
 
-export class YeelightDiscoveryClient implements DiscoverClient<Light> {
+export class YeelightDiscoveryClient
+  implements DiscoverClient<LightClientDisconnected> {
   private discoverer: Discover
   constructor() {
     this.discoverer = new Discover({})
   }
   async discoverAllLights() {
     const devices = (await this.discoverer.start()).filter(Boolean)
-    const lights: Light[] = devices.map(_ => this.mapLight(_))
+    const lights: LightClientDisconnected[] = devices.map(_ => this.mapLight(_))
 
     return lights
   }
@@ -26,7 +26,7 @@ export class YeelightDiscoveryClient implements DiscoverClient<Light> {
     return this.discoverer.destroy()
   }
 
-  private createConnect(device: IDevice): Light['connect'] {
+  private createConnect(device: IDevice): LightClientDisconnected['connect'] {
     return async () => {
       const light = new Yeelight({
         lightId: device.id,
@@ -59,7 +59,7 @@ export class YeelightDiscoveryClient implements DiscoverClient<Light> {
     }
   }
 
-  private mapLight(device: IDevice): Light {
+  private mapLight(device: IDevice): LightClientDisconnected {
     return {
       ...pick(device, devicePickKeys),
       name: device.name || 'unknownYeelight',
