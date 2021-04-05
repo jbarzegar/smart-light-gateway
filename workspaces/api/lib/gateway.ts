@@ -1,5 +1,5 @@
 import { Light } from './entities'
-import { DiscoverClient } from '@gateway/types/discoverClient'
+import { DiscoverClient } from '@gateway/types'
 
 export type Discoverer = DiscoverClient<Light>
 

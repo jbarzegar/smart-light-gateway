@@ -1,5 +1,4 @@
-import { Light, ConnectedLight, BaseLight } from '@gateway/types/entities'
-import { DiscoverClient } from '@gateway/types/discoverClient'
+import { Light, LightClientConnected, DiscoverClient } from '@gateway/types'
 
 import { mockLights } from './data'
 
@@ -12,9 +11,9 @@ const db = low<low.AdapterAsync<{ lights: Light[] }>>(adapter)
 ;(async () => (await db).defaults({ lights: mockLights }).write())()
 
 type FnMakeConnect = (
-  base: BaseLight,
-  conf?: Partial<BaseLight>
-) => () => Promise<ConnectedLight>
+  base: Light,
+  conf?: Partial<Light>
+) => () => Promise<LightClientConnected>
 const makeConnect: FnMakeConnect = (base, conf = {}) => {
   const light = { ...base, ...conf }
 

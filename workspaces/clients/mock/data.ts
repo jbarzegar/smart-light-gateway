@@ -1,6 +1,6 @@
-import { BaseLight } from '@gateway/types/entities'
+import { Light } from '@gateway/types'
 
-export const mockLights: BaseLight[] = [
+export const mockLights: Light[] = [
   {
     host: '0.0.0.0',
     port: 420,
