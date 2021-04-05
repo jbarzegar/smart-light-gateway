@@ -79,6 +79,8 @@
     "@types/react-dom": "^17.0.0",
     "@types/redux-logger": "^3.0.8",
     "@types/yup": "^0.29.11",
+    "prettier": "^2.2.1",
+    "pretty-quick": "^3.1.0",
     "storybook-addon-performance": "^0.15.1"
   }
 }

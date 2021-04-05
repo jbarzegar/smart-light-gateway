@@ -37,6 +37,8 @@ export const withStore = (store: Store) => (Story: Function) => {
   )
 }
 
+export const withEmptyStore = () => withStore(createStore())
+
 export const withFullAppState = () =>
   withStore(compose(createWithRoomStore, storeWithDevices)())
 

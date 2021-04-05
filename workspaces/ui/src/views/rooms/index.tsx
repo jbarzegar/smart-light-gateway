@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   Heading,
+  Box,
   Container,
   Table,
   Tbody,
@@ -17,16 +18,44 @@ import { MdAdd } from 'react-icons/md'
 import { actions } from 'core/rooms/state'
 import { selectAll } from 'core/rooms/selectors'
 
-import { AddForm, EmptyState, TableHead, TableItem } from './components'
+import { AddForm } from './forms/AddForm'
+import { EmptyState, TableHead, TableItem } from './components'
 
 type RoomStates = 'hasRooms' | 'empty'
 
 const calcRoomState = (arr: any[]): RoomStates =>
   arr.length === 0 ? 'empty' : 'hasRooms'
 
+type NewRoomDrawerProps = { open: boolean; onClose(): void }
+const NewRoomDrawer = (props: NewRoomDrawerProps) => {
+  const { open, onClose } = props
+  const dispatch = useDispatch()
+
+  return (
+    <Drawer size="sm" isOpen={open} onClose={onClose}>
+      <DrawerOverlay>
+        <DrawerContent>
+          <Box overflowY="auto">
+            <AddForm
+              onAdd={data => {
+                dispatch(
+                  actions.create({
+                    ...data,
+                    attachedDeviceIds: data.attachedDeviceIds as string[],
+                  })
+                )
+                onClose()
+              }}
+            />
+          </Box>
+        </DrawerContent>
+      </DrawerOverlay>
+    </Drawer>
+  )
+}
+
 export const RoomsView = () => {
   const rooms = useSelector(selectAll)
-  const dispatch = useDispatch()
   const [roomState, setRoomState] = useState<RoomStates>(calcRoomState(rooms))
   const [addingRoom, setAddingRoom] = useState(false)
 
@@ -59,28 +88,7 @@ export const RoomsView = () => {
           </Tbody>
         </Table>
       )}
-      <Drawer
-        size="sm"
-        isOpen={addingRoom}
-        onClose={() => setAddingRoom(false)}
-      >
-        <DrawerOverlay>
-          <DrawerContent>
-            <AddForm
-              onAdd={data => {
-                console.log(data)
-                dispatch(
-                  actions.create({
-                    ...data,
-                    attachedDeviceIds: data.attachedDeviceIds as string[],
-                  })
-                )
-                setAddingRoom(false)
-              }}
-            />
-          </DrawerContent>
-        </DrawerOverlay>
-      </Drawer>
+      <NewRoomDrawer onClose={() => setAddingRoom(false)} open={addingRoom} />
     </Container>
   )
 }
