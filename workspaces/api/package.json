@@ -22,7 +22,7 @@
     "lowdb": "^1.0.0",
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
-    "nanoid": "^3.1.20",
+    "nanoid": "^3.1.22",
     "node-fetch": "^2.6.1",
     "yeelight-awesome": "^1.0.12"
   },
