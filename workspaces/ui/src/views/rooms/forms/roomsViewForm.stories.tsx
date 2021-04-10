@@ -1,10 +1,11 @@
 import { Meta, Story } from '@storybook/react'
 import { action } from '@storybook/addon-actions'
-import { Drawer, DrawerOverlay, DrawerContent, Box } from '@chakra-ui/react'
-import { default as viewStory } from '../roomsView.stories'
-import { withDeviceStore, withEmptyStore } from '.storybook/decorators'
+import { Box } from '@chakra-ui/react'
+import { BasicDrawer } from 'components/BasicDrawer'
 import { AttachDevice } from './AttachDevice'
 import { AddForm as AddFormComp } from './AddForm'
+import { default as viewStory } from '../roomsView.stories'
+import { withDeviceStore, withEmptyStore } from '.storybook/decorators'
 
 export default {
   title: `${viewStory.title}/Forms`,
@@ -12,18 +13,14 @@ export default {
 
 const Template = () => {
   return (
-    <Drawer size="sm" isOpen onClose={action('closing')}>
-      <DrawerOverlay>
-        <DrawerContent p={'8'}>
-          <Box overflowY="auto" sx={{ scrollPadding: '8px' }}>
-            <AttachDevice
-              onDeviceAttachment={action('Device Attached')}
-              onDeviceDetach={action('Device Detached')}
-            />
-          </Box>
-        </DrawerContent>
-      </DrawerOverlay>
-    </Drawer>
+    <BasicDrawer size="lg" open onClose={action('closing')}>
+      <Box overflowY="auto" sx={{ scrollPadding: '8px' }}>
+        <AttachDevice
+          onDeviceDetach={action('Device Detached')}
+          onDeviceAttachment={action('Device Attached')}
+        />
+      </Box>
+    </BasicDrawer>
   )
 }
 
@@ -34,12 +31,8 @@ export const AttachDeviceFormEmpty: Story = Template.bind({})
 AttachDeviceFormEmpty.decorators = [withEmptyStore()]
 
 export const AddForm: Story = () => (
-  <Drawer size="sm" isOpen onClose={action('Closing Form')}>
-    <DrawerOverlay>
-      <DrawerContent p={'8'}>
-        <AddFormComp onAdd={action('Creating room')} />
-      </DrawerContent>
-    </DrawerOverlay>
-  </Drawer>
+  <BasicDrawer size="lg" open heading="asdf" onClose={action('Closing Form')}>
+    <AddFormComp onAdded={action('Creating room')} />
+  </BasicDrawer>
 )
 AddForm.decorators = [withEmptyStore()]

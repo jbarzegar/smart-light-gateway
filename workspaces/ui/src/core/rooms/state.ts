@@ -13,26 +13,34 @@ export type NewRoom = Omit<Room, 'id'>
 
 type RoomReducer<P> = FnEntityReducer<Room, P>
 
-type RoomReducers = EntityReducers<Room> & {
-  create: RoomReducer<NewRoom>
-  createMany: RoomReducer<NewRoom[]>
-  remove: RoomReducer<EntityId>
-}
-
 export const adapter = createEntityAdapter<Room>({
   selectId: x => x.id,
   sortComparer: (a, b) => a.name.localeCompare(b.name),
 })
 
+type RoomReducers = EntityReducers<Room> & {
+  create: RoomReducer<NewRoom>
+  createMany: RoomReducer<NewRoom[]>
+  remove: RoomReducer<EntityId>
+  update: RoomReducer<Room>
+  hydrate: RoomReducer<Room[]>
+}
 const reducers: RoomReducers = {
   create: (state, { payload }) => adapter.addOne(state, mapNewRoom(payload)),
   createMany: (state, { payload }) =>
     adapter.addMany(state, payload.map(mapNewRoom)),
   remove: adapter.removeOne,
+  hydrate: adapter.setAll,
+  update: (state, { payload }) =>
+    adapter.updateOne(state, { id: payload.id, changes: payload }),
 }
 
-export const { actions, reducer, name } = createSlice({
+export const { actions: sliceActions, reducer, name } = createSlice({
   name: 'rooms',
   initialState: adapter.getInitialState(),
   reducers,
 })
+
+export const actions = {
+  ...sliceActions,
+}

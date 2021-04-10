@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { MutationStatus } from 'react-query'
 import {
   Button,
   FormControl,
@@ -7,68 +8,106 @@ import {
   Input,
   DrawerBody,
   DrawerFooter,
-  DrawerHeader,
-  DrawerCloseButton,
+  Spinner,
 } from '@chakra-ui/react'
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
 
 import { AttachDevice } from './AttachDevice'
+import {
+  useRoomViewContext,
+  RoomViewStates,
+  useCreateRoomHandler,
+  useUpdateRoomHandler,
+  AddFormSchema,
+  useAddRoomForm,
+} from '../viewContext'
+import { deDupeArray } from 'utils'
 
-const addFormSchema = yup.object({
-  name: yup.string().required(),
-  description: yup.string().optional(),
-  attachedDeviceIds: yup.array(yup.string()).optional().default([]),
-})
-type AddFormSchema = yup.InferType<typeof addFormSchema>
+export const AddForm = ({ onAdded }: { onAdded(): void }) => {
+  const createRoom = useCreateRoomHandler()
+  const updateRoom = useUpdateRoomHandler()
 
-export const AddForm = (props: { onAdd(data: AddFormSchema): void }) => {
-  const { register, handleSubmit, errors } = useForm<AddFormSchema>({
-    resolver: yupResolver(addFormSchema),
+  const mutationIs = useCallback(
+    (status: MutationStatus) =>
+      [createRoom.status, updateRoom.status].some(x => x === status),
+    [createRoom.status, updateRoom.status]
+  )
+
+  const { roomEditData, viewState } = useRoomViewContext()
+
+  const { register, handleSubmit, errors } = useAddRoomForm({
+    name: roomEditData?.name,
+    description: roomEditData?.description,
   })
   const [attachedDeviceIds, setAttachedDeviceIds] = useState<string[]>([])
 
+  useEffect(() => {
+    if (mutationIs('success')) onAdded()
+  }, [onAdded, mutationIs])
+
+  const isEditing = viewState === RoomViewStates.editingRoom
+
+  const onSubmit = (data: AddFormSchema) => {
+    const payload = { ...data, attachedDeviceIds }
+
+    if (isEditing && roomEditData)
+      updateRoom.mutate({ id: roomEditData.id, ...payload })
+    else createRoom.mutate(payload)
+  }
+
+  useEffect(() => {
+    if (roomEditData?.attachedDeviceIds && isEditing) {
+      setAttachedDeviceIds(roomEditData.attachedDeviceIds)
+    }
+    return () => setAttachedDeviceIds([])
+  }, [roomEditData, isEditing])
+
   return (
     <>
-      <DrawerCloseButton />
-      <DrawerHeader>Add new Room</DrawerHeader>
-      <form
-        onSubmit={handleSubmit(d => props.onAdd({ ...d, attachedDeviceIds }))}
-      >
-        <DrawerBody>
-          <FormControl mb="4">
-            <FormLabel htmlFor="description">Room name</FormLabel>
-            <Input name="name" ref={register({ required: true })} />
-            {errors.name && <FormErrorMessage>{errors.name}</FormErrorMessage>}
-          </FormControl>
-          <FormControl mb="4">
-            <FormLabel htmlFor="description">
-              Room description (optional)
-            </FormLabel>
-            <Input name="description" ref={register()}></Input>
-            {errors.description && (
-              <FormErrorMessage>{errors.description}</FormErrorMessage>
-            )}
-          </FormControl>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {mutationIs('loading') ? (
+          <Spinner />
+        ) : (
+          <>
+            <DrawerBody>
+              <FormControl mb="4">
+                <FormLabel htmlFor="description">Room name</FormLabel>
+                <Input
+                  autoFocus
+                  name="name"
+                  ref={register({ required: true })}
+                />
+                {errors.name && (
+                  <FormErrorMessage>{errors.name}</FormErrorMessage>
+                )}
+              </FormControl>
+              <FormControl mb="4">
+                <FormLabel htmlFor="description">
+                  Room description (optional)
+                </FormLabel>
+                <Input name="description" ref={register()}></Input>
+                {errors.description && (
+                  <FormErrorMessage>{errors.description}</FormErrorMessage>
+                )}
+              </FormControl>
 
-          <AttachDevice
-            onDeviceDetach={id =>
-              setAttachedDeviceIds(arr => arr.filter(x => id !== x))
-            }
-            onDeviceAttachment={deviceId =>
-              setAttachedDeviceIds(arr =>
-                Array.from(new Set([...arr, deviceId]))
-              )
-            }
-          />
-        </DrawerBody>
+              <AttachDevice
+                initialDevices={attachedDeviceIds}
+                onDeviceDetach={id =>
+                  setAttachedDeviceIds(arr => arr.filter(x => id !== x))
+                }
+                onDeviceAttachment={deviceId =>
+                  setAttachedDeviceIds(arr => deDupeArray([...arr, deviceId]))
+                }
+              />
+            </DrawerBody>
 
-        <DrawerFooter>
-          <Button type="submit" mt={'4'}>
-            Create
-          </Button>
-        </DrawerFooter>
+            <DrawerFooter>
+              <Button type="submit" mt={'4'}>
+                {isEditing ? 'Update' : 'Create'}
+              </Button>
+            </DrawerFooter>
+          </>
+        )}
       </form>
     </>
   )

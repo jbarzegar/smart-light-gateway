@@ -15,6 +15,7 @@ import {
 } from '@chakra-ui/react'
 import { MdEdit, MdDelete, MdRoundedCorner, MdAdd } from 'react-icons/md'
 import { actions, Room } from 'core/rooms/state'
+import { useRoomViewContext } from './viewContext'
 
 export const TableHead = () => (
   <Thead>
@@ -29,8 +30,10 @@ export const TableHead = () => (
 
 export const TableItem = (room: Room) => {
   const dispatch = useDispatch()
-  const handleDeleteClick = (id: string) => () => dispatch(actions.remove(id))
   const { colorMode } = useColorMode()
+  const { editRoom } = useRoomViewContext()
+
+  const handleDeleteClick = (id: string) => () => dispatch(actions.remove(id))
 
   return (
     <Tr>
@@ -39,16 +42,18 @@ export const TableItem = (room: Room) => {
         {room.description || 'No description'}
       </Td>
       <Td>{room.attachedDeviceIds.length}</Td>
-      <Td isNumeric>
-        <HStack spacing={10} justify="flex-end">
-          <IconButton icon={<MdEdit />} aria-label="Edit room" />
-          <IconButton
-            icon={<MdDelete />}
-            aria-label="Delete room"
-            onClick={handleDeleteClick(room.id)}
-          />
-        </HStack>
-      </Td>
+      <HStack as={Td} spacing={10} justify="flex-end" isNumeric>
+        <IconButton
+          icon={<MdEdit />}
+          aria-label="Edit room"
+          onClick={() => editRoom(room)}
+        />
+        <IconButton
+          icon={<MdDelete />}
+          aria-label="Delete room"
+          onClick={handleDeleteClick(room.id)}
+        />
+      </HStack>
     </Tr>
   )
 }
@@ -56,23 +61,22 @@ export const TableItem = (room: Room) => {
 export const EmptyState = (props: { onAdd(): void }) => {
   const { colorMode } = useColorMode()
   return (
-    <Box
+    <VStack
       p="8"
       boxShadow="base"
+      direction="column"
       borderRadius="base"
       bg={colorMode === 'dark' ? 'gray.700' : 'gray.50'}
     >
-      <VStack direction="column">
-        <Icon as={MdRoundedCorner} boxSize="sm" />
-        <Box>
-          <Heading as="h3" mb="8">
-            You have no rooms
-          </Heading>
-          <Button leftIcon={<MdAdd />} colorScheme="gray" onClick={props.onAdd}>
-            Add new room
-          </Button>
-        </Box>
-      </VStack>
-    </Box>
+      <Icon as={MdRoundedCorner} boxSize="sm" />
+      <Box>
+        <Heading as="h3" mb="8">
+          You have no rooms
+        </Heading>
+        <Button leftIcon={<MdAdd />} colorScheme="gray" onClick={props.onAdd}>
+          Add new room
+        </Button>
+      </Box>
+    </VStack>
   )
 }

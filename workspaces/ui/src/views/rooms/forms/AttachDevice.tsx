@@ -6,15 +6,15 @@ import {
   Flex,
   VStack,
   Heading,
-  Box,
   useColorMode,
   Text,
-  Collapse,
 } from '@chakra-ui/react'
-import { MdClearAll } from 'react-icons/md'
 import { isEmpty } from 'lodash'
+
+import { BasicDrawer } from 'components/BasicDrawer'
 import { Device } from 'core/devices'
 import { selectAll as selectAllDevices } from 'core/devices/selectors'
+import { useRoomViewContext, RoomViewStates } from '../viewContext'
 
 type DeviceCardProps = {
   device: Device
@@ -65,37 +65,48 @@ const DeviceCard = ({ device, onClick, deviceIncluded }: DeviceCardProps) => {
   )
 }
 
+type AttachDeviceStates = 'addingDevice' | 'removingDevice' | 'idle'
 type AttachDeviceProps = {
+  initialDevices?: string[]
   onDeviceAttachment(id: string): void
   onDeviceDetach(id: string): void
 }
 export const AttachDevice = ({
-  onDeviceAttachment,
   onDeviceDetach,
+  onDeviceAttachment,
+  initialDevices = [],
 }: AttachDeviceProps) => {
   const allDevices = useSelector(selectAllDevices)
-  const [deviceIds, setDeviceIds] = useState<string[]>([])
+  const { viewState } = useRoomViewContext()
+  const [deviceIds, setDeviceIds] = useState<string[]>(initialDevices)
   const [deviceValue, setDeviceValue] = useState<string>()
   const [shouldAttachDevice, setShouldAttachDevice] = useState(false)
-  const [state, setState] = useState<
-    'addingDevice' | 'removingDevice' | 'idle'
-  >('idle')
+  const [state, setState] = useState<AttachDeviceStates>('idle')
 
   useEffect(() => {
-    switch (state) {
-      case 'addingDevice':
+    if (!isEmpty(initialDevices) && viewState === RoomViewStates.editingRoom) {
+      setDeviceIds(initialDevices)
+    }
+  }, [initialDevices, setDeviceIds, viewState])
+
+  useEffect(() => {
+    const handler: Record<typeof state, () => void> = {
+      addingDevice() {
         if (deviceValue) {
           setDeviceIds(
             t => Array.from(new Set([...t, deviceValue])) as string[]
           )
           onDeviceAttachment(deviceValue)
         }
-        break
-      case 'removingDevice':
+      },
+      idle: () => {},
+      removingDevice() {
         setDeviceIds(t => t.filter(x => x !== deviceValue))
         onDeviceDetach(deviceValue || '')
-        break
+      },
     }
+
+    handler[state]()
 
     if (state !== 'idle' && !!deviceValue) {
       setState('idle')
@@ -115,26 +126,20 @@ export const AttachDevice = ({
   return (
     <>
       <Flex alignItems="center" justifyContent="space-between" mb={'8'}>
-        <Text
-          fontSize="xl"
-          fontWeight="semibold"
-          onClick={() => setShouldAttachDevice(!shouldAttachDevice)}
+        <Button
+          variant="solid"
+          colorScheme="purple"
+          onClick={() => setShouldAttachDevice(true)}
         >
           Attach Device(s)
-        </Text>
-        {shouldAttachDevice && (
-          <Box>
-            <Button
-              leftIcon={<MdClearAll />}
-              disabled={isEmpty(deviceIds)}
-              onClick={() => setDeviceIds([])}
-            >
-              Detach all devices
-            </Button>
-          </Box>
-        )}
+        </Button>
       </Flex>
-      <Collapse in={shouldAttachDevice} animateOpacity>
+      <BasicDrawer
+        size="sm"
+        open={shouldAttachDevice}
+        heading="Attach Devices(s)"
+        onClose={() => setShouldAttachDevice(false)}
+      >
         <SimpleGrid columns={2} spacing={10}>
           {allDevices.map(device => (
             <DeviceCard
@@ -152,7 +157,7 @@ export const AttachDevice = ({
             />
           ))}
         </SimpleGrid>
-      </Collapse>
+      </BasicDrawer>
     </>
   )
 }

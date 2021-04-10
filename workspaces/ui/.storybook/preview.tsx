@@ -1,11 +1,8 @@
-import {
-  Flex,
-  IconButton,
-  useColorMode,
-  useColorModeValue,
-} from '@chakra-ui/react'
+import { useColorMode } from '@chakra-ui/react'
 import { StoryContext } from '@storybook/react'
 import * as React from 'react'
+import { QueryClientProvider, QueryClient } from 'react-query'
+import { ReactQueryDevtools } from 'react-query/devtools'
 import { withPerformance } from 'storybook-addon-performance'
 import { ThemeProvider } from '../src/global/Providers'
 
@@ -57,4 +54,23 @@ const withChakra = (StoryFn: Function, context: StoryContext) => {
   )
 }
 
-export const decorators = [withChakra, withPerformance]
+const withReactQuery = (StoryFn: Function) => {
+  return (
+    <QueryClientProvider
+      client={
+        new QueryClient({
+          defaultOptions: {
+            queries: {
+              refetchOnWindowFocus: false,
+            },
+          },
+        })
+      }
+    >
+      <StoryFn />
+      <ReactQueryDevtools />
+    </QueryClientProvider>
+  )
+}
+
+export const decorators = [withReactQuery, withChakra, withPerformance]

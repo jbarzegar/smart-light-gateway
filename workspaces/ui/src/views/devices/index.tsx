@@ -6,7 +6,6 @@ import { selectAll as selectAllDevices } from 'core/devices/selectors'
 
 export const DevicesView = () => {
   const devices = useSelector(selectAllDevices)
-
   return (
     <SimpleGrid columns={4} spacing="8">
       {devices.map(device => (

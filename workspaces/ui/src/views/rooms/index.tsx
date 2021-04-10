@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import {
   Heading,
   Box,
@@ -8,15 +8,18 @@ import {
   Tbody,
   HStack,
   Button,
-  Flex,
-  Drawer,
-  DrawerOverlay,
-  DrawerContent,
+  Spinner,
 } from '@chakra-ui/react'
 import { MdAdd } from 'react-icons/md'
+import {
+  RoomViewContextProvider,
+  useRoomViewContext,
+  useHydrateRooms,
+  RoomViewStates,
+} from './viewContext'
 
-import { actions } from 'core/rooms/state'
 import { selectAll } from 'core/rooms/selectors'
+import { BasicDrawer } from 'components/BasicDrawer'
 
 import { AddForm } from './forms/AddForm'
 import { EmptyState, TableHead, TableItem } from './components'
@@ -29,54 +32,54 @@ const calcRoomState = (arr: any[]): RoomStates =>
 type NewRoomDrawerProps = { open: boolean; onClose(): void }
 const NewRoomDrawer = (props: NewRoomDrawerProps) => {
   const { open, onClose } = props
-  const dispatch = useDispatch()
+  const { viewState } = useRoomViewContext()
 
+  const heading = `${
+    viewState === RoomViewStates.editingRoom ? 'Editing' : 'Creating'
+  } Room`
   return (
-    <Drawer size="sm" isOpen={open} onClose={onClose}>
-      <DrawerOverlay>
-        <DrawerContent>
-          <Box overflowY="auto">
-            <AddForm
-              onAdd={data => {
-                dispatch(
-                  actions.create({
-                    ...data,
-                    attachedDeviceIds: data.attachedDeviceIds as string[],
-                  })
-                )
-                onClose()
-              }}
-            />
-          </Box>
-        </DrawerContent>
-      </DrawerOverlay>
-    </Drawer>
+    <BasicDrawer heading={heading} size="lg" open={open} onClose={onClose}>
+      <Box overflowY="auto">
+        <AddForm onAdded={onClose} />
+      </Box>
+    </BasicDrawer>
   )
 }
 
-export const RoomsView = () => {
+const RoomViewRoot = () => {
   const rooms = useSelector(selectAll)
+  const { status } = useHydrateRooms()
+  const { viewState, cleanupRoom } = useRoomViewContext()
+  const [roomDrawerOpen, setRoomDrawerOpen] = useState(false)
   const [roomState, setRoomState] = useState<RoomStates>(calcRoomState(rooms))
-  const [addingRoom, setAddingRoom] = useState(false)
 
   useEffect(() => {
     setRoomState(calcRoomState(rooms))
   }, [rooms])
 
+  useEffect(() => {
+    if (viewState === RoomViewStates.editingRoom) {
+      setRoomDrawerOpen(true)
+    }
+  }, [viewState])
+
+  if (status === 'loading') return <Spinner />
+
   return (
     <Container maxW="container.lg" py={'12'}>
       <HStack align="center" justify="space-between" mb={'24'}>
-        <Flex>
-          <Heading as="h2">Rooms</Heading>
-        </Flex>
+        <Heading as="h2">Rooms</Heading>
         {roomState === 'hasRooms' && (
-          <Button leftIcon={<MdAdd />} onClick={() => setAddingRoom(true)}>
+          <Button
+            leftIcon={<MdAdd aria-label="add icon" />}
+            onClick={() => setRoomDrawerOpen(true)}
+          >
             Add Room
           </Button>
         )}
       </HStack>
       {roomState === 'empty' && (
-        <EmptyState onAdd={() => setAddingRoom(true)} />
+        <EmptyState onAdd={() => setRoomDrawerOpen(true)} />
       )}
       {roomState === 'hasRooms' && (
         <Table>
@@ -88,7 +91,21 @@ export const RoomsView = () => {
           </Tbody>
         </Table>
       )}
-      <NewRoomDrawer onClose={() => setAddingRoom(false)} open={addingRoom} />
+      <NewRoomDrawer
+        onClose={() => {
+          setRoomDrawerOpen(false)
+          cleanupRoom()
+        }}
+        open={roomDrawerOpen}
+      />
     </Container>
+  )
+}
+
+export const RoomsView = () => {
+  return (
+    <RoomViewContextProvider>
+      <RoomViewRoot />
+    </RoomViewContextProvider>
   )
 }
