@@ -1,0 +1,62 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "10:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: "@storybook/addon-actions"
+    versions:
+    - 6.2.3
+    - 6.2.5
+    - 6.2.7
+    - 6.2.8
+  - dependency-name: "@storybook/node-logger"
+    versions:
+    - 6.2.3
+    - 6.2.5
+    - 6.2.7
+    - 6.2.8
+  - dependency-name: "@storybook/addon-links"
+    versions:
+    - 6.1.16
+    - 6.1.17
+    - 6.1.18
+    - 6.1.20
+    - 6.1.21
+    - 6.2.1
+    - 6.2.2
+    - 6.2.3
+    - 6.2.5
+    - 6.2.7
+    - 6.2.8
+  - dependency-name: ts-jest
+    versions:
+    - 26.5.0
+    - 26.5.1
+    - 26.5.2
+    - 26.5.3
+    - 26.5.4
+  - dependency-name: react-scripts
+    versions:
+    - 4.0.1
+    - 4.0.2
+    - 4.0.3
+  - dependency-name: "@types/node"
+    versions:
+    - 14.14.22
+    - 14.14.25
+    - 14.14.27
+    - 14.14.31
+    - 14.14.32
+    - 14.14.33
+    - 14.14.34
+    - 14.14.35
+    - 14.14.36
+  - dependency-name: "@types/react-dom"
+    versions:
+    - 17.0.0
+    - 17.0.1
+    - 17.0.2
