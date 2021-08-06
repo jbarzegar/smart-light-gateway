@@ -1,14 +1,23 @@
 import { PropsWithChildren } from 'react'
 import { EnhancedStore } from '@reduxjs/toolkit'
 import { Provider as ReduxProvider } from 'react-redux'
-import { ChakraProvider, theme } from '@chakra-ui/react'
+import {
+  ChakraProvider,
+  extendTheme,
+  withDefaultColorScheme,
+} from '@chakra-ui/react'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import { QueryClient, QueryClientProvider } from 'react-query'
 
 import { isEnv } from 'utils'
 
 export const ThemeProvider = (props: PropsWithChildren<{}>) => (
-  <ChakraProvider theme={theme} {...props} />
+  <ChakraProvider
+    theme={extendTheme({
+      ...withDefaultColorScheme({ colorScheme: 'orange' }),
+    })}
+    {...props}
+  />
 )
 
 export const StateProvider = (

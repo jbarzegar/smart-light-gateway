@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer } from 'react'
 import {
   Button,
   SimpleGrid,
@@ -65,12 +65,40 @@ const DeviceCard = ({ device, onClick, deviceIncluded }: DeviceCardProps) => {
   )
 }
 
+type AttachDeviceState = {
+  deviceIds: string[]
+  deviceValue: string
+  shouldAttachDevice: boolean
+  componentState: AttachDeviceStates
+}
+
+const initialState: AttachDeviceState = {
+  componentState: 'idle',
+  deviceIds: [],
+  deviceValue: '',
+  shouldAttachDevice: false,
+}
 type AttachDeviceStates = 'addingDevice' | 'removingDevice' | 'idle'
 type AttachDeviceProps = {
   initialDevices?: string[]
   onDeviceAttachment(id: string): void
   onDeviceDetach(id: string): void
 }
+
+type AttachDeviceActions =
+  | {
+      type: 'GET_ATTACHED_DEVICES'
+      payload: { viewState: RoomViewStates; initialDevices: string[] }
+    }
+  | {
+      type: 'TRANSITION_ATTACH_DEVICE_VIEW'
+      payload: { shouldAttach: boolean }
+    }
+  | {
+      type: 'TRANSITION_ATTACH_DEVICE'
+      payload: {}
+    }
+
 export const AttachDevice = ({
   onDeviceDetach,
   onDeviceAttachment,
@@ -82,6 +110,12 @@ export const AttachDevice = ({
   const [deviceValue, setDeviceValue] = useState<string>()
   const [shouldAttachDevice, setShouldAttachDevice] = useState(false)
   const [state, setState] = useState<AttachDeviceStates>('idle')
+  const [{}, dispatch] = useReducer(
+    (state: AttachDeviceState, action: AttachDeviceActions) => {
+      return state
+    },
+    initialState
+  )
 
   useEffect(() => {
     if (!isEmpty(initialDevices) && viewState === RoomViewStates.editingRoom) {
@@ -147,12 +181,13 @@ export const AttachDevice = ({
               device={device}
               deviceIncluded={deviceIds.includes(device.id)}
               onClick={() => {
+                dispatch({ type: '', payload: { device } })
                 setDeviceValue(device.id)
-                if (deviceIds.includes(device.id)) {
-                  setState('removingDevice')
-                } else {
-                  setState('addingDevice')
-                }
+                setState(
+                  deviceIds.includes(device.id)
+                    ? 'removingDevice'
+                    : 'addingDevice'
+                )
               }}
             />
           ))}

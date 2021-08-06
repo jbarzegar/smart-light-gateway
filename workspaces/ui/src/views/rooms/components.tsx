@@ -30,7 +30,6 @@ export const TableHead = () => (
 
 export const TableItem = (room: Room) => {
   const dispatch = useDispatch()
-  const { colorMode } = useColorMode()
   const { editRoom } = useRoomViewContext()
 
   const handleDeleteClick = (id: string) => () => dispatch(actions.remove(id))
@@ -38,9 +37,7 @@ export const TableItem = (room: Room) => {
   return (
     <Tr>
       <Td fontWeight="bold">{room.name}</Td>
-      <Td color={colorMode === 'dark' ? 'whiteAlpha.400' : 'gray.400'}>
-        {room.description || 'No description'}
-      </Td>
+      <Td>{room.description || 'No description'}</Td>
       <Td>{room.attachedDeviceIds.length}</Td>
       <HStack as={Td} spacing={10} justify="flex-end" isNumeric>
         <IconButton
@@ -59,21 +56,14 @@ export const TableItem = (room: Room) => {
 }
 
 export const EmptyState = (props: { onAdd(): void }) => {
-  const { colorMode } = useColorMode()
   return (
-    <VStack
-      p="8"
-      boxShadow="base"
-      direction="column"
-      borderRadius="base"
-      bg={colorMode === 'dark' ? 'gray.700' : 'gray.50'}
-    >
+    <VStack p="8" boxShadow="base" direction="column" borderRadius="base">
       <Icon as={MdRoundedCorner} boxSize="sm" />
       <Box>
         <Heading as="h3" mb="8">
           You have no rooms
         </Heading>
-        <Button leftIcon={<MdAdd />} colorScheme="gray" onClick={props.onAdd}>
+        <Button leftIcon={<MdAdd />} onClick={props.onAdd}>
           Add new room
         </Button>
       </Box>
