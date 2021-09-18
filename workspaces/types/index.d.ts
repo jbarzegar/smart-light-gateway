@@ -1,2 +1,2 @@
 export * from './entities'
-export * from './DiscoverClient'
+export * from './discoverClient'
