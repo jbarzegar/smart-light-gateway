@@ -1,5 +1,5 @@
 {
-  "extends": "../../config/tsconfig.json",
+  "extends": "@gateway/config/tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

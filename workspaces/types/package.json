@@ -1,4 +1,9 @@
 {
   "name": "@gateway/types",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "description": "Contains all domain-level typings, interfaces, and entities",
+  "dependencies": {
+    "@gateway/config": "1.0.0"
+  },
+  "prettier": "@gateway/config/prettier"
 }
