@@ -1,4 +1,4 @@
 {
-  "extends": "../../config/tsconfig.json",
+  "extends": "@gateway/config/tsconfig.json",
   "include": ["entities", "client.d.ts", "DiscoverClient.d.ts", "index.d.ts"]
 }

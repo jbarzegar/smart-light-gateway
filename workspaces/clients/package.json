@@ -10,5 +10,9 @@
     "lodash": "^4.17.21",
     "lowdb": "^1.0.0",
     "yeelight-awesome": "^1.0.12"
-  }
+  },
+  "devDependencies": {
+    "@gateway/config": "1.0.0"
+  },
+  "prettier": "@gateway/config/prettier"
 }
