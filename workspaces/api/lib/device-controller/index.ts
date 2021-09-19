@@ -1,3 +1,4 @@
+//
 import {
   Light,
   LightClientDisconnected,
@@ -6,12 +7,9 @@ import {
   LightActions,
 } from 'types'
 import { Gateway } from '@lib/gateway'
-
-type ID = string | number
+import { ID, byId } from './util'
 
 const defaultLightConf: MethodOptions = { timing: 500, transition: 'smooth' }
-
-const byId = (id: ID) => (x: Light) => id === x.id
 
 type FnGetLightById = (id: ID) => Promise<Light | undefined>
 type FnSetPower = (
@@ -19,11 +17,11 @@ type FnSetPower = (
   mode: PowerMode
 ) => Promise<void>
 
-type FnInitAction<Actions> = (
+type FnCreateController<Actions> = (
   gateway: Gateway,
   config?: MethodOptions
 ) => Actions
-const initLightActions: FnInitAction<LightActions> = (
+export const createDeviceController: FnCreateController<LightActions> = (
   gateway,
   conf = defaultLightConf
 ) => {
@@ -49,5 +47,3 @@ const initLightActions: FnInitAction<LightActions> = (
     },
   }
 }
-
-export default initLightActions

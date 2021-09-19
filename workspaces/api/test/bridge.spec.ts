@@ -45,6 +45,9 @@ const setupMockBindings: FnCreateBindings<MockDeps, MockDeviceActions> = (
   let devices: Record<string, MockDevice> = {}
 
   return {
+    async getDevices() {
+      return Object.values(devices)
+    },
     async getDevice(id) {
       const device = devices[id]
 

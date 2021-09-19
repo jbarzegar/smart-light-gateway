@@ -1,6 +1,6 @@
 import { flow } from 'lodash'
 import api from './api'
-import initLightActions from './actions/lights'
+import { createDeviceController } from '@lib/device-controller'
 import { createBridgeInstance } from '@lib/bridge'
 import * as HaBridge from '@lib/bridge/bindings/ha-bridge'
 
@@ -13,7 +13,7 @@ const Client = new MockClient()
 const getLightActions = flow(
   () => Client,
   client => new Gateway(client),
-  gateway => initLightActions(gateway)
+  gateway => createDeviceController(gateway)
 )
 
 const devConf: ApiConf = { actions: { getLightActions } }
