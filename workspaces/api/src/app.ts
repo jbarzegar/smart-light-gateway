@@ -25,19 +25,20 @@ const bridge = createBridgeInstance(
 )
 
 // bridge.device.create()
-const item = Client.discoverAllLights()
-  .then(x => x[0])
-  .then(device =>
-    bridge.device.create({
-      name: device.name || 'unknownDevice',
-      onActions: [{ name: 'SET_POWER', payload: 'on' }],
-      offActions: [{ name: 'SET_POWER', payload: 'off' }],
-      dimActions: [{ name: 'SET_BRIGHTNESS', payload: '${device.intensity}' }],
-      colorActions: [
-        {
-          name: 'SET_COLOR',
-          payload: { r: '${color.r}', g: '${color.g}', b: '${color.b}' },
-        },
-      ],
-    })
-  )
+// const item = Client.discoverAllLights()
+//   .then(x => x[0])
+//   .then(device =>
+//     bridge.device.create({
+//       name: device.name || 'unknownDevice',
+//       onActions: [{ name: 'SET_POWER', payload: 'on' }],
+//       offActions: [{ name: 'SET_POWER', payload: 'off' }],
+//       dimActions: [{ name: 'SET_BRIGHTNESS', payload: '${device.intensity}' }],
+//       colorActions: [
+//         {
+//           name: 'SET_COLOR',
+//           payload: { r: '${color.r}', g: '${color.g}', b: '${color.b}' },
+//         },
+//       ],
+//     })
+//   )
+bridge.device.getAll().then(console.log)
