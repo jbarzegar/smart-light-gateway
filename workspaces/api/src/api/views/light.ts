@@ -14,6 +14,14 @@ export const useLightView = useRouter<LightActions>(([actions, route]) => {
     const { lightId } = req.params
     const light = await actions.getLightById(lightId)
 
+    console.log(light)
+
+    if (!light) {
+      return res
+        .status(404)
+        .json({ error: { message: 'Could not find light ' } })
+    }
+
     return res.status(200).json(light)
   })
 
@@ -42,8 +50,11 @@ export const useLightView = useRouter<LightActions>(([actions, route]) => {
 
       actions
         .setLightPower(lightId, powerStatus)
-        .then(_ => _ || notFound('could not find light'))
-        .then(status => res.status(200).send({ status }))
+        .then(status =>
+          !!status
+            ? res.status(200).send({ status })
+            : notFound('could not find light')
+        )
         .catch(err => {
           console.log(err)
           res.status(400).json(err)

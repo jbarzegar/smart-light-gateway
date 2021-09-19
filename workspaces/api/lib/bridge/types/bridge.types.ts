@@ -49,6 +49,8 @@ export type FnMapBridgeInfo<Response extends PrimitiveObject> = (
 
 /** Collect to manipulate bridge devices */
 export type BridgeDevices<T extends XAction> = {
+  /** Get all devices */
+  getAll(): Promise<BridgeDevice<T>[]>
   /** Gets a device by ID */
   get(id: string): Promise<BridgeDevice<T>>
   /** Registers new bridge device. */

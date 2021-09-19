@@ -4,6 +4,7 @@ import { XAction, BridgeInfo, NewDevice, BridgeDevice } from './bridge.types'
 /** To bind to the standard bridge interface. */
 export type BridgeBindings<T extends XAction> = {
   getInfo(): Promise<BridgeInfo>
+  getDevices(): Promise<BridgeDevice<T>[]>
   getDevice(id: string): Promise<BridgeDevice<T>>
   createDevice(device: NewDevice<T>): Promise<BridgeDevice<T>>
   updateDevice(

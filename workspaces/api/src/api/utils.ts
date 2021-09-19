@@ -1,5 +1,5 @@
 import { Router as getRouter } from 'express'
-import { Router } from 'types'
+import { Router, Application, NextHandleFunction } from 'types'
 
 /** creates new router object, accepts closure fn passing express routing context and dependencies from caller */
 export const useRouter = <Data extends Object>(
@@ -11,3 +11,7 @@ export const useRouter = <Data extends Object>(
 
   return route
 }
+
+export const applyMiddleware = (...middleware: NextHandleFunction[]) => (
+  app: Application
+) => app.use(...middleware)

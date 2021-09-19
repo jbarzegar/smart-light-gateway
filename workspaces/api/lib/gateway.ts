@@ -1,10 +1,10 @@
-import { Light } from './entities'
+import { LightClientDisconnected } from './entities'
 import { DiscoverClient } from '@gateway/types'
 
-export type Discoverer = DiscoverClient<Light>
+export type Discoverer = DiscoverClient<LightClientDisconnected>
 
 interface IGateway {
-  discover(): Promise<Light[]>
+  discover(): Promise<LightClientDisconnected[]>
 }
 
 export class Gateway implements IGateway {
@@ -13,7 +13,7 @@ export class Gateway implements IGateway {
     this.discoverer = discoverer
   }
   /** A non persistent connection that returns all lights on network */
-  async discover(): Promise<Light[]> {
+  async discover(): Promise<LightClientDisconnected[]> {
     const lights = await this.discoverer.discoverAllLights()
 
     return lights

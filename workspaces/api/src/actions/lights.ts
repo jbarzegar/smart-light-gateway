@@ -1,7 +1,6 @@
-import { flow } from 'lodash'
 import {
   Light,
-  ConnectedLight,
+  LightClientDisconnected,
   MethodOptions,
   PowerMode,
   LightActions,
@@ -14,6 +13,12 @@ const defaultLightConf: MethodOptions = { timing: 500, transition: 'smooth' }
 
 const byId = (id: ID) => (x: Light) => id === x.id
 
+type FnGetLightById = (id: ID) => Promise<Light | undefined>
+type FnSetPower = (
+  light: LightClientDisconnected,
+  mode: PowerMode
+) => Promise<void>
+
 type FnInitAction<Actions> = (
   gateway: Gateway,
   config?: MethodOptions
@@ -22,27 +27,14 @@ const initLightActions: FnInitAction<LightActions> = (
   gateway,
   conf = defaultLightConf
 ) => {
-  const getLightById = flow<
-    [ID],
-    { id: ID; lights: Promise<Light[]> },
-    Promise<Light | undefined>
-  >(
-    id => ({ lights: gateway.discover(), id }),
-    async ({ id, lights }) => (await lights).find(byId(id))
-  )
+  const getLightById: FnGetLightById = async id =>
+    (await gateway.discover()).find(byId(id))
 
-  const setPower = flow<
-    [Light, PowerMode],
-    { mode: PowerMode; light: Promise<ConnectedLight> },
-    Promise<void>
-  >(
-    (light, mode) => ({ mode, light: light.connect() }),
-    async ({ mode, light }) => {
-      const l = await light
-      await l.setPower(mode, conf)
-      l.disconnect()
-    }
-  )
+  const setPower: FnSetPower = async (light, mode) => {
+    const l = await light.connect()
+    await l.setPower(mode, conf)
+    await l.disconnect()
+  }
 
   return {
     getAllLights: () => gateway.discover(),
@@ -52,7 +44,7 @@ const initLightActions: FnInitAction<LightActions> = (
 
       if (!light) return undefined
 
-      await setPower(light, powerMode)
+      await setPower(light as LightClientDisconnected, powerMode)
       return powerMode
     },
   }
