@@ -12,7 +12,8 @@
     "yeelight-awesome": "^1.0.12"
   },
   "devDependencies": {
-    "@gateway/config": "1.0.0"
+    "@gateway/config": "1.0.0",
+    "@types/color": "^3.0.2"
   },
   "prettier": "@gateway/config/prettier"
 }

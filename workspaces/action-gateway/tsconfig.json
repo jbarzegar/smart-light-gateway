@@ -1,0 +1,8 @@
+{
+  "extends": "@gateway/config/tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true
+  },
+  "include": ["server.ts"],
+  "exclude": ["node_modules"]
+}

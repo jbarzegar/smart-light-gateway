@@ -1,0 +1,24 @@
+actions:
+- name: sync_bridge
+  definition:
+    kind: synchronous
+    handler: http://localhost:2000/sync_bridge
+custom_types:
+  enums: []
+  input_objects:
+  - name: SyncBridgeNewDeviceInput
+  - name: SyncBridgeRemovedDeviceInput
+  objects:
+  - name: SyncBridgeOutput
+  scalars:
+  - name: JSON
+  - name: BridgeIDRecord
+    description: |-
+      The BridgeIDRecord represents an object containing all relevant ids
+      ```json
+      {
+        id: ID
+        hwID: String
+        bridgeId: Int
+      }
+      ```

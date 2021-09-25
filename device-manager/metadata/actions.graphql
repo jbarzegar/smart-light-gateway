@@ -1,0 +1,33 @@
+type Mutation {
+  sync_bridge(
+    newDevices: [SyncBridgeNewDeviceInput]!
+    removedDevices: [SyncBridgeRemovedDeviceInput]!
+  ): SyncBridgeOutput
+}
+
+input SyncBridgeNewDeviceInput {
+  id: ID
+  name: String
+}
+
+input SyncBridgeRemovedDeviceInput {
+  id: ID
+  bridgeId: Int
+}
+
+type SyncBridgeOutput {
+  """ Passes array of id records see BridgeIDRecord """ added: [BridgeIDRecord]!
+  """ Passes array of id records see BridgeIDRecord """ removed: [BridgeIDRecord]!
+}
+
+scalar JSON
+
+""" The BridgeIDRecord represents an object containing all relevant ids
+```json
+{
+  id: ID
+  hwID: String
+  bridgeId: Int
+}
+``` """ scalar BridgeIDRecord
+

@@ -1,0 +1,12 @@
+{
+  "name": "@gateway/action-gateway",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "NODE_ENV=development tsnd --respawn server.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@gateway/config": "1.0.0"
+  },
+  "prettier": "@gateway/config/prettier"
+}
