@@ -9,20 +9,19 @@ import { MockClient } from '@lib/clients'
 
 type ApiConf = Parameters<typeof api>[0]
 
-const Client = new MockClient()
-const getLightActions = flow(
-  () => Client,
-  client => new Gateway(client),
+const haBridgeBindings = HaBridge.bindings({ apiUrl: 'http://localhost:8000' })
+const bridge = createBridgeInstance(haBridgeBindings)
+
+const lightActions = flow(
+  client => new Gateway(client, bridge),
   gateway => createDeviceController(gateway)
-)
+)(new MockClient())
+
+const getLightActions = () => lightActions
 
 const devConf: ApiConf = { actions: { getLightActions } }
 
 api(devConf)
-
-const bridge = createBridgeInstance(
-  HaBridge.bindings({ apiUrl: 'http://localhost:8080' })
-)
 
 // bridge.device.create()
 // const item = Client.discoverAllLights()
@@ -41,4 +40,11 @@ const bridge = createBridgeInstance(
 //       ],
 //     })
 //   )
-bridge.device.getAll().then(console.log)
+//.then(console.log)
+
+const main = async () => {
+  const x = await bridge.device.getAll()
+  const l = await lightActions.getAllLights()
+
+  console.log(x)
+}

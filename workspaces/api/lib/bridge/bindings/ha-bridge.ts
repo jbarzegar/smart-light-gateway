@@ -62,23 +62,24 @@ export type HaBridgePingAPIResponse = {
   }
 }
 
-export const mapBridgeInfo: FnMapBridgeInfo<HaBridgePingAPIResponse> = data => ({
-  bridgeId: data.config.bridgeid,
-  gateway: data.config.gateway,
-  ipAddress: data.config.ipaddress,
-  macAddress: data.config.mac,
-  modelId: data.config.modelid,
-  name: data.config.name,
-  time: {
-    local: new Date(data.config.localtime),
-    utc: new Date(data.config.UTC),
-    zone: data.config.timezone,
-  },
-  version: {
-    api: data.config.apiversion,
-    software: data.config.swversion,
-  },
-})
+export const mapBridgeInfo: FnMapBridgeInfo<HaBridgePingAPIResponse> =
+  data => ({
+    bridgeId: data.config.bridgeid,
+    gateway: data.config.gateway,
+    ipAddress: data.config.ipaddress,
+    macAddress: data.config.mac,
+    modelId: data.config.modelid,
+    name: data.config.name,
+    time: {
+      local: new Date(data.config.localtime),
+      utc: new Date(data.config.UTC),
+      zone: data.config.timezone,
+    },
+    version: {
+      api: data.config.apiversion,
+      software: data.config.swversion,
+    },
+  })
 
 const mapHaBridgeDevice: (x: HaBridgeDeviceResponse) => BridgeDevice = x => ({
   id: x.mapId,
@@ -144,6 +145,8 @@ export const bindings: FnCreateBindings<HaBridgeBindingDeps, XAction> = ({
   async getDevices() {
     try {
       const response = await fetch(`${apiUrl}/api/devices`)
+      if (!response.ok) throw await response.json()
+
       const data: HaBridgeDeviceResponse[] = await response.json()
       return data.map<BridgeDevice>(mapHaBridgeDevice)
     } catch (e) {

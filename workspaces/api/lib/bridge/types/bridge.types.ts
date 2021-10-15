@@ -64,7 +64,7 @@ export type BridgeDevices<T extends XAction> = {
   delete(id: string): Promise<void>
 }
 
-export type Bridge<T extends XAction> = {
+export type Bridge<T extends XAction = XAction> = {
   getInfo(): Promise<BridgeInfo>
   device: BridgeDevices<T>
 }
