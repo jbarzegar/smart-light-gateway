@@ -1,0 +1,3 @@
+table:
+  name: mapped_devices
+  schema: application
